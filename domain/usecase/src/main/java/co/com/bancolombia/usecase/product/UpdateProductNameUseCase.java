@@ -1,22 +1,31 @@
 package co.com.bancolombia.usecase.product;
 
 import co.com.bancolombia.model.product.Product;
-import co.com.bancolombia.model.product.gateways.ProductRepository;
+import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
 import reactor.core.publisher.Mono;
 
 public class UpdateProductNameUseCase {
-    private final ProductRepository productRepository;
+    private final FranchiseRepository franchiseRepository;
 
-    public UpdateProductNameUseCase(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public UpdateProductNameUseCase(FranchiseRepository franchiseRepository) {
+        this.franchiseRepository = franchiseRepository;
     }
 
-    public Mono<Product> execute(String productId, String newName) {
-        return productRepository.findById(productId)
-                .flatMap(product -> {
-                    product.setName(newName);
-                    return productRepository.save(product);
-                })
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Product not found")));
+    public Mono<Product> execute(String franchiseId, String branchId, String productId, String newName) {
+        return franchiseRepository.findById(franchiseId)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Franchise not found")))
+                .flatMap(franchise -> {
+                    Product productToUpdate = franchise.getBranches()
+                            .stream()
+                            .filter(b -> b.getId().equals(branchId))
+                            .flatMap(branch -> branch.getProducts().stream())
+                            .filter(p -> p.getId().equals(productId))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+                    productToUpdate.setName(newName);
+                    return franchiseRepository.save(franchise)
+                            .thenReturn(productToUpdate);
+                });
     }
 }

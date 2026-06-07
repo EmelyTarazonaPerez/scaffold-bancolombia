@@ -1,22 +1,32 @@
 package co.com.bancolombia.usecase.product;
 
-import co.com.bancolombia.model.product.gateways.ProductRepository;
+import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
 import reactor.core.publisher.Mono;
 
 public class DeleteProductUseCase {
-    private final ProductRepository productRepository;
+    private final FranchiseRepository franchiseRepository;
 
-    public DeleteProductUseCase(ProductRepository productRepository) {
-        this.productRepository = productRepository;
+    public DeleteProductUseCase(FranchiseRepository franchiseRepository) {
+        this.franchiseRepository = franchiseRepository;
     }
 
-    public Mono<Void> execute(String productId) {
-        return productRepository.existsById(productId)
-                .flatMap(exists -> {
-                    if (!exists) {
-                        return Mono.error(new IllegalArgumentException("Product not found"));
+    public Mono<Void> execute(String franchiseId, String branchId, String productId) {
+        return franchiseRepository.findById(franchiseId)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Franchise not found")))
+                .flatMap(franchise -> {
+                    boolean branchFound = franchise.getBranches()
+                            .stream()
+                            .filter(b -> b.getId().equals(branchId))
+                            .peek(branch -> branch.getProducts()
+                                    .removeIf(p -> p.getId().equals(productId)))
+                            .findFirst()
+                            .isPresent();
+
+                    if (!branchFound) {
+                        return Mono.error(new IllegalArgumentException("Branch not found"));
                     }
-                    return productRepository.deleteById(productId);
+
+                    return franchiseRepository.save(franchise).then();
                 });
     }
 }

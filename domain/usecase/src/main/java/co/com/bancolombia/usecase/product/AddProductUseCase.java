@@ -2,29 +2,29 @@ package co.com.bancolombia.usecase.product;
 
 import co.com.bancolombia.model.product.Product;
 import co.com.bancolombia.model.branch.Branch;
-import co.com.bancolombia.model.branch.gateways.BranchRepository;
-import co.com.bancolombia.model.product.gateways.ProductRepository;
+import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
 import reactor.core.publisher.Mono;
 
 public class AddProductUseCase {
-    private final BranchRepository branchRepository;
-    private final ProductRepository productRepository;
+    private final FranchiseRepository franchiseRepository;
 
-    public AddProductUseCase(BranchRepository branchRepository, ProductRepository productRepository) {
-        this.branchRepository = branchRepository;
-        this.productRepository = productRepository;
+    public AddProductUseCase(FranchiseRepository franchiseRepository) {
+        this.franchiseRepository = franchiseRepository;
     }
 
-    public Mono<Product> execute(String branchId, Product product) {
-        return branchRepository.findById(branchId)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Branch not found")))
-                .flatMap(branch ->
-                    productRepository.save(product)
-                            .flatMap(savedProduct -> {
-                                branch.getProducts().add(savedProduct);
-                                return branchRepository.save(branch)
-                                        .thenReturn(savedProduct);
-                            })
-                );
+    public Mono<Product> execute(String franchiseId, String branchId, Product product) {
+        return franchiseRepository.findById(franchiseId)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Franchise not found")))
+                .flatMap(franchise -> {
+                    Branch branch = franchise.getBranches()
+                            .stream()
+                            .filter(b -> b.getId().equals(branchId))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Branch not found"));
+
+                    branch.getProducts().add(product);
+                    return franchiseRepository.save(franchise)
+                            .thenReturn(product);
+                });
     }
 }
