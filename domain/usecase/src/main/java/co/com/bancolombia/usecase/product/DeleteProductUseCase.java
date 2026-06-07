@@ -1,5 +1,7 @@
 package co.com.bancolombia.usecase.product;
 
+import co.com.bancolombia.model.exception.Exceptions;
+import co.com.bancolombia.model.exception.ResourceNotFoundException;
 import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
 import reactor.core.publisher.Mono;
 
@@ -12,7 +14,7 @@ public class DeleteProductUseCase {
 
     public Mono<Void> execute(String franchiseId, String branchId, String productId) {
         return franchiseRepository.findById(franchiseId)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Franchise not found")))
+                .switchIfEmpty(Mono.error(Exceptions.franchiseNotFound()))
                 .flatMap(franchise -> {
                     boolean branchFound = franchise.getBranches()
                             .stream()
@@ -23,7 +25,7 @@ public class DeleteProductUseCase {
                             .isPresent();
 
                     if (!branchFound) {
-                        return Mono.error(new IllegalArgumentException("Branch not found"));
+                        return Mono.error(Exceptions.branchNotFound());
                     }
 
                     return franchiseRepository.save(franchise).then();
