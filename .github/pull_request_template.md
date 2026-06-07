@@ -1,5 +1,5 @@
 ## Description
-Describe brevemente los cambios que realiza este PR.
+Briefly describe the changes made in this PR.
 
 ## Type of Change
 - [ ] ✨ New feature
@@ -10,7 +10,7 @@ Describe brevemente los cambios que realiza este PR.
 - [ ] 🚨 Breaking change
 
 ## Related Issues
-Closes #(número del issue si aplica)
+Closes #(issue number if applicable)
 
 ## Changes
 - Change 1
@@ -18,23 +18,23 @@ Closes #(número del issue si aplica)
 - Change 3
 
 ## Testing
-Describe cómo probaste los cambios:
+Describe how you tested the changes:
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Manual testing completed
 
 ## Screenshots (if applicable)
-Agrega screenshots o gifs si es relevante para la UI.
+Add screenshots or gifs if relevant to the UI.
 
 ## Checklist
-- [ ] Mi código sigue las guías de estilo del proyecto
-- [ ] He revisado mi propio código
-- [ ] He comentado el código complejo o no obvio
-- [ ] He actualizado la documentación correspondiente
-- [ ] Mis cambios no generan nuevas warnings
-- [ ] He agregado tests que prueban mi cambio
-- [ ] Los tests nuevos y existentes pasan localmente
+- [ ] My code follows the project's style guidelines
+- [ ] I have reviewed my own code
+- [ ] I have commented complex or non-obvious code
+- [ ] I have updated the corresponding documentation
+- [ ] My changes do not generate new warnings
+- [ ] I have added tests that verify my changes
+- [ ] New and existing tests pass locally
 
 ## Additional Notes
-Agrega notas adicionales si es necesario.
+Add any additional notes if necessary.
 
