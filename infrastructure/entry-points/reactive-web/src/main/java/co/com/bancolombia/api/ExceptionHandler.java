@@ -4,6 +4,7 @@ import co.com.bancolombia.model.exception.BusinessRuleException;
 import co.com.bancolombia.model.exception.DomainException;
 import co.com.bancolombia.model.exception.InvalidInputException;
 import co.com.bancolombia.model.exception.ResourceNotFoundException;
+import co.com.bancolombia.model.exception.ServiceUnavailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,7 +26,9 @@ public class ExceptionHandler {
     public Mono<ServerResponse> handleException(Throwable throwable) {
         log.error("Exception occurred", throwable);
 
-        if (throwable instanceof ResourceNotFoundException notFound) {
+        if (throwable instanceof ServiceUnavailableException serviceUnavailable) {
+            return handleServiceUnavailable(serviceUnavailable);
+        } else if (throwable instanceof ResourceNotFoundException notFound) {
             return handleResourceNotFound(notFound);
         } else if (throwable instanceof InvalidInputException invalid) {
             return handleInvalidInput(invalid);
@@ -38,6 +41,19 @@ public class ExceptionHandler {
         } else {
             return handleUnexpectedError(throwable);
         }
+    }
+
+    private Mono<ServerResponse> handleServiceUnavailable(ServiceUnavailableException ex) {
+        log.warn("Service unavailable: {} - Circuit breaker may be open", ex.getServiceName());
+        ErrorResponse error = new ErrorResponse(
+                ex.getErrorCode(),
+                ex.getMessage(),
+                HttpStatus.SERVICE_UNAVAILABLE.value()
+        );
+        return ServerResponse
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
     }
 
     private Mono<ServerResponse> handleResourceNotFound(ResourceNotFoundException ex) {
