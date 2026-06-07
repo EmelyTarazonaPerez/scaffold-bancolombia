@@ -17,5 +17,5 @@ public class Product {
     @Id
     private String id;
     private String name;
-    private List<String> branches;
+    private Integer stock;
 }
