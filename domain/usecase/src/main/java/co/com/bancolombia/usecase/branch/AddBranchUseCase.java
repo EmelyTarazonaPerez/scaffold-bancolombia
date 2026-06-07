@@ -10,23 +10,19 @@ import reactor.core.publisher.Mono;
 
 public class AddBranchUseCase {
     private final FranchiseRepository franchiseRepository;
-    private final BranchRepository branchRepository;
 
-    public AddBranchUseCase(FranchiseRepository franchiseRepository, BranchRepository branchRepository) {
+    public AddBranchUseCase(FranchiseRepository franchiseRepository) {
         this.franchiseRepository = franchiseRepository;
-        this.branchRepository = branchRepository;
     }
 
     public Mono<Branch> execute(String franchiseId, Branch branch) {
         return franchiseRepository.findById(franchiseId)
                 .switchIfEmpty(Mono.error(Exceptions.franchiseNotFound()))
-                .flatMap(franchise ->
-                    branchRepository.save(branch)
-                            .flatMap(savedBranch -> {
-                                franchise.getBranches().add(savedBranch);
-                                return franchiseRepository.save(franchise)
-                                        .thenReturn(savedBranch);
-                            })
-                );
+                .flatMap(franchise -> {
+                    franchise.getBranches().add(branch);
+
+                    return franchiseRepository.save(franchise)
+                            .thenReturn(branch);
+                });
     }
 }

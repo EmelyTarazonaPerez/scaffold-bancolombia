@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -205,6 +206,7 @@ public class FranchiseHandler {
     public Mono<ServerResponse> getMaxStockProduct(ServerRequest request) {
         String franchiseId = request.pathVariable("franchiseId");
         return getMaxStockProductUseCase.execute(franchiseId)
+                .collectList()
                 .flatMap(product -> ServerResponse.ok().bodyValue(product))
                 .onErrorResume(exceptionHandler::handleException);
     }

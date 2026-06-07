@@ -1,10 +1,13 @@
 package co.com.bancolombia.usecase.product;
 
+import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.exception.Exceptions;
-import co.com.bancolombia.model.exception.ResourceNotFoundException;
 import co.com.bancolombia.model.product.Product;
 import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Comparator;
 
 public class GetMaxStockProductUseCase {
     private final FranchiseRepository franchiseRepository;
@@ -13,17 +16,18 @@ public class GetMaxStockProductUseCase {
         this.franchiseRepository = franchiseRepository;
     }
 
-    public Mono<Product> execute(String franchiseId) {
+    public Flux<Product> execute(String franchiseId) {
         return franchiseRepository.findById(franchiseId)
                 .switchIfEmpty(Mono.error(Exceptions.franchiseNotFound()))
-                .flatMap(franchise -> {
-                    Product maxStockProduct = franchise.getBranches()
-                            .stream()
-                            .flatMap(branch -> branch.getProducts().stream())
-                            .max((p1, p2) -> Integer.compare(p1.getStock(), p2.getStock()))
-                            .orElseThrow(Exceptions::productNotFound);
-
-                    return Mono.just(maxStockProduct);
+                .flatMapMany(franchise -> {
+                    // Obtener el producto con mayor stock de cada sucursal
+                    return Flux.fromIterable(franchise.getBranches())
+                            .filter(branch -> !branch.getProducts().isEmpty())
+                            .map(branch -> branch.getProducts()
+                                    .stream()
+                                    .max(Comparator.comparingInt(Product::getStock))
+                                    .orElseThrow(Exceptions::productNotFound)
+                            );
                 });
     }
 }

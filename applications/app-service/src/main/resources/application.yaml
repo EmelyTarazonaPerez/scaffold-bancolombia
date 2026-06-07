@@ -12,8 +12,8 @@ spring:
   profiles:
     include: null
   data:
-    mongodb:
-      uri: "mongodb://localhost:27017/test"
+      mongodb:
+        uri: mongodb+srv://emelydayannatp_db_user:3hqdbOaqN5aX8wIR@franchise.ffdctcj.mongodb.net/franchise?retryWrites=true&w=majority
 management:
   endpoints:
     web:
