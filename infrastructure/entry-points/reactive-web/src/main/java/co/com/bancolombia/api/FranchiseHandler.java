@@ -36,6 +36,7 @@ public class FranchiseHandler {
     private final UpdateProductStockUseCase updateProductStockUseCase;
     private final UpdateProductNameUseCase updateProductNameUseCase;
     private final GetMaxStockProductUseCase getMaxStockProductUseCase;
+    private final ExceptionHandler exceptionHandler;
 
     @Operation(summary = "Create a new franchise",
             description = "Creates a new franchise with the provided name")
@@ -51,7 +52,8 @@ public class FranchiseHandler {
                 )
                 .flatMap(franchise ->
                         ServerResponse.ok().bodyValue(franchise)
-                );
+                )
+                .onErrorResume(exceptionHandler::handleException);
     }
 
     @Operation(summary = "Update franchise name",
@@ -70,7 +72,8 @@ public class FranchiseHandler {
                 )
                 .flatMap(franchise ->
                         ServerResponse.ok().bodyValue(franchise)
-                );
+                )
+                .onErrorResume(exceptionHandler::handleException);
     }
 
     @Operation(summary = "Add branch to franchise",
@@ -88,7 +91,8 @@ public class FranchiseHandler {
                 )
                 .flatMap(branch ->
                         ServerResponse.ok().bodyValue(branch)
-                );
+                )
+                .onErrorResume(exceptionHandler::handleException);
     }
 
     @Operation(summary = "Update branch name",
@@ -107,7 +111,8 @@ public class FranchiseHandler {
                 )
                 .flatMap(branch ->
                         ServerResponse.ok().bodyValue(branch)
-                );
+                )
+                .onErrorResume(exceptionHandler::handleException);
     }
 
     @Operation(summary = "Add product to branch",
@@ -126,7 +131,8 @@ public class FranchiseHandler {
                 )
                 .flatMap(product ->
                         ServerResponse.ok().bodyValue(product)
-                );
+                )
+                .onErrorResume(exceptionHandler::handleException);
     }
 
     @Operation(summary = "Delete product",
@@ -143,7 +149,8 @@ public class FranchiseHandler {
         return deleteProductUseCase.execute(franchiseId, branchId, productId)
                 .flatMap(v ->
                         ServerResponse.noContent().build()
-                );
+                )
+                .onErrorResume(exceptionHandler::handleException);
     }
 
     @Operation(summary = "Update product stock",
@@ -163,7 +170,8 @@ public class FranchiseHandler {
                 )
                 .flatMap(product ->
                         ServerResponse.ok().bodyValue(product)
-                );
+                )
+                .onErrorResume(exceptionHandler::handleException);
     }
 
     @Operation(summary = "Update product name",
@@ -183,7 +191,8 @@ public class FranchiseHandler {
                 )
                 .flatMap(product ->
                         ServerResponse.ok().bodyValue(product)
-                );
+                )
+                .onErrorResume(exceptionHandler::handleException);
     }
 
     @Operation(summary = "Get product with maximum stock",
@@ -196,8 +205,7 @@ public class FranchiseHandler {
     public Mono<ServerResponse> getMaxStockProduct(ServerRequest request) {
         String franchiseId = request.pathVariable("franchiseId");
         return getMaxStockProductUseCase.execute(franchiseId)
-                .flatMap(product ->
-                        ServerResponse.ok().bodyValue(product)
-                );
+                .flatMap(product -> ServerResponse.ok().bodyValue(product))
+                .onErrorResume(exceptionHandler::handleException);
     }
 }

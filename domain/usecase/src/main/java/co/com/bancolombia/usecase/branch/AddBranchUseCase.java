@@ -1,6 +1,8 @@
 package co.com.bancolombia.usecase.branch;
 
 import co.com.bancolombia.model.branch.Branch;
+import co.com.bancolombia.model.exception.Exceptions;
+import co.com.bancolombia.model.exception.ResourceNotFoundException;
 import co.com.bancolombia.model.franchise.Franchise;
 import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
 import co.com.bancolombia.model.branch.gateways.BranchRepository;
@@ -17,7 +19,7 @@ public class AddBranchUseCase {
 
     public Mono<Branch> execute(String franchiseId, Branch branch) {
         return franchiseRepository.findById(franchiseId)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Franchise not found")))
+                .switchIfEmpty(Mono.error(Exceptions.franchiseNotFound()))
                 .flatMap(franchise ->
                     branchRepository.save(branch)
                             .flatMap(savedBranch -> {
