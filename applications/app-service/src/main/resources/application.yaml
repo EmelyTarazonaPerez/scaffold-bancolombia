@@ -43,6 +43,7 @@ resilience4j:
           - java.net.SocketTimeoutException
           - java.io.IOException
           - org.springframework.dao.DataAccessException
+          - java.lang.RuntimeException
     instances:
       mongoCB:
         baseConfig: default

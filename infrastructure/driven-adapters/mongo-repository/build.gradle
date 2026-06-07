@@ -6,10 +6,10 @@ dependencies {
     implementation 'org.reactivecommons.utils:object-mapper-api:0.1.0'
 
     // Resilience4j Circuit Breaker
-    implementation 'io.github.resilience4j:resilience4j-core:2.1.0'
     implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.1.0'
     implementation 'io.github.resilience4j:resilience4j-reactor:2.1.0'
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.1.0'
+
 
     testImplementation 'org.reactivecommons.utils:object-mapper:0.1.0'
 }
