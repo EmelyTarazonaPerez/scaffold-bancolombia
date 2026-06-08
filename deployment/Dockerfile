@@ -1,4 +1,4 @@
-FROM gradle:8.10.2-jdk21-alpine AS build
+FROM gradle:9.1.0-jdk21-alpine AS build
 WORKDIR /app
 COPY . .
 RUN gradle clean build -x test
