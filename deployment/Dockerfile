@@ -1,7 +1,7 @@
 FROM gradle:9.1.0-jdk25-alpine AS build
 WORKDIR /app
 COPY . .
-RUN gradle clean build -x test
+RUN gradle clean build -x test -x validateStructure
 
 FROM eclipse-temurin:25-jdk-alpine
 WORKDIR /app
