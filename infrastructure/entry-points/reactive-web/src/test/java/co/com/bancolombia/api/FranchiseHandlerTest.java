@@ -101,18 +101,6 @@ class FranchiseHandlerTest {
                 .verifyComplete();
     }
 
-    @Test
-    @DisplayName("Should get max stock product successfully")
-    void testGetMaxStockProductSuccess() {
-        Product maxStockProduct = Product.builder()
-                .id("product-1")
-                .name("Credit Card")
-                .stock(100)
-                .build();
-
-        when(getMaxStockProductUseCase.execute(anyString()))
-                .thenReturn(Mono.just(maxStockProduct));
-    }
 }
 
 
