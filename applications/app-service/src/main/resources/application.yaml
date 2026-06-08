@@ -1,0 +1,49 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: "cleanArchitecture"
+  devtools:
+    add-properties: false
+  h2:
+    console:
+      enabled: true
+      path: "/h2"
+  profiles:
+    include: null
+  data:
+      mongodb:
+        uri: mongodb+srv://emelydayannatp_db_user:3hqdbOaqN5aX8wIR@franchise.ffdctcj.mongodb.net/franchise?retryWrites=true&w=majority
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 100
+        minimumNumberOfCalls: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5000
+        failureRateThreshold: 50.0
+        slowCallRateThreshold: 50.0
+        slowCallDurationThreshold: 2000
+        recordExceptions:
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+          - java.io.IOException
+          - org.springframework.dao.DataAccessException
+    instances:
+      mongoCB:
+        baseConfig: default
+        waitDurationInOpenState: 10000

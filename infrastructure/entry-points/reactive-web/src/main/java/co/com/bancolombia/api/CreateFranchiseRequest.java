@@ -1,0 +1,32 @@
+package co.com.bancolombia.api;
+
+import co.com.bancolombia.model.branch.Branch;
+import co.com.bancolombia.model.franchise.Franchise;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Schema(description = "Request to create a new franchise with branches and products")
+public record CreateFranchiseRequest(
+        @Schema(description = "Franchise name", example = "Bancolombia - Centro")
+        String name,
+        @Schema(description = "Branches with products", example = "[]")
+        List<BranchInFranchiseRequest> branches
+) {
+    public Franchise toFranchise() {
+        List<Branch> branchList = branches != null && !branches.isEmpty()
+                ? branches.stream()
+                .map(BranchInFranchiseRequest::toBranch)
+                .collect(Collectors.toList())
+                : new ArrayList<>();
+
+        return Franchise.builder()
+                .id(UUID.randomUUID().toString())
+                .name(name)
+                .branches(branchList)
+                .build();
+    }
+}
