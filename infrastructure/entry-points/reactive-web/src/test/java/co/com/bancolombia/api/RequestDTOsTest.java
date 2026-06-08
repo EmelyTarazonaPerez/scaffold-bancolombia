@@ -4,6 +4,8 @@ import co.com.bancolombia.model.franchise.Franchise;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import static org.assertj.core.api.Assertions.*;
 
 @DisplayName("Request DTOs Tests")
@@ -12,7 +14,7 @@ class RequestDTOsTest {
     @Test
     @DisplayName("CreateFranchiseRequest should convert to Franchise model")
     void testCreateFranchiseRequestConversion() {
-        CreateFranchiseRequest request = new CreateFranchiseRequest("Bancolombia Center");
+        CreateFranchiseRequest request = new CreateFranchiseRequest("Bancolombia Center", new ArrayList<>());
         Franchise franchise = request.toFranchise();
 
         assertThat(franchise).isNotNull();

@@ -1,60 +1,157 @@
 package co.com.bancolombia.api;
 
-import org.assertj.core.api.Assertions;
+import co.com.bancolombia.model.franchise.Franchise;
+import co.com.bancolombia.model.product.Product;
+import co.com.bancolombia.usecase.branch.AddBranchUseCase;
+import co.com.bancolombia.usecase.branch.UpdateBranchNameUseCase;
+import co.com.bancolombia.usecase.franchise.CreateFranchiseUseCase;
+import co.com.bancolombia.usecase.franchise.UpdateFranchiseNameUseCase;
+import co.com.bancolombia.usecase.product.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-@ContextConfiguration(classes = {RouterRest.class, FranchiseHandler.class})
-@WebFluxTest
+import java.util.ArrayList;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Router REST Integration Tests")
 class RouterRestTest {
 
-    @Autowired
     private WebTestClient webTestClient;
 
-    @Test
-    void testListenGETUseCase() {
-        webTestClient.get()
-                .uri("/api/usecase/path")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
+    @Mock
+    private CreateFranchiseUseCase createFranchiseUseCase;
+
+    @Mock
+    private UpdateFranchiseNameUseCase updateFranchiseNameUseCase;
+
+    @Mock
+    private AddBranchUseCase addBranchUseCase;
+
+    @Mock
+    private UpdateBranchNameUseCase updateBranchNameUseCase;
+
+    @Mock
+    private AddProductUseCase addProductUseCase;
+
+    @Mock
+    private DeleteProductUseCase deleteProductUseCase;
+
+    @Mock
+    private UpdateProductStockUseCase updateProductStockUseCase;
+
+    @Mock
+    private UpdateProductNameUseCase updateProductNameUseCase;
+
+    @Mock
+    private GetMaxStockProductUseCase getMaxStockProductUseCase;
+
+    @BeforeEach
+    void setUp() {
+        ExceptionHandler exceptionHandler = new ExceptionHandler();
+        FranchiseHandler franchiseHandler = new FranchiseHandler(
+                createFranchiseUseCase,
+                updateFranchiseNameUseCase,
+                addBranchUseCase,
+                updateBranchNameUseCase,
+                addProductUseCase,
+                deleteProductUseCase,
+                updateProductStockUseCase,
+                updateProductNameUseCase,
+                getMaxStockProductUseCase,
+                exceptionHandler
+        );
+
+        RouterRest routerRest = new RouterRest();
+        webTestClient = WebTestClient
+                .bindToRouterFunction(routerRest.routerFunction(franchiseHandler))
+                .build();
     }
 
     @Test
-    void testListenGETOtherUseCase() {
-        webTestClient.get()
-                .uri("/api/otherusercase/path")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
-    }
+    @DisplayName("Should create franchise via POST endpoint")
+    void testCreateFranchise() {
+        Franchise franchise = Franchise.builder()
+                .id("franchise-1")
+                .name("Test Franchise")
+                .branches(new ArrayList<>())
+                .build();
 
-    @Test
-    void testListenPOSTUseCase() {
+        when(createFranchiseUseCase.execute(any(Franchise.class)))
+                .thenReturn(Mono.just(franchise));
+
         webTestClient.post()
-                .uri("/api/usecase/otherpath")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue("")
+                .uri("/api/franchises")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"name\":\"Test Franchise\",\"branches\":[]}")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(String.class)
-                .value(userResponse -> {
-                            Assertions.assertThat(userResponse).isEmpty();
-                        }
-                );
+                .expectBody(Franchise.class)
+                .value(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getName()).isEqualTo("Test Franchise");
+                });
+    }
+
+    @Test
+    @DisplayName("Should update franchise name via PUT endpoint")
+    void testUpdateFranchiseName() {
+        Franchise franchise = Franchise.builder()
+                .id("franchise-1")
+                .name("Updated Franchise")
+                .branches(new ArrayList<>())
+                .build();
+
+        when(updateFranchiseNameUseCase.execute(anyString(), anyString()))
+                .thenReturn(Mono.just(franchise));
+
+        webTestClient.put()
+                .uri("/api/franchises/franchise-1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("{\"newName\":\"Updated Franchise\"}")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Franchise.class)
+                .value(response -> {
+                    assertThat(response).isNotNull();
+                    assertThat(response.getName()).isEqualTo("Updated Franchise");
+                });
+    }
+
+    @Test
+    @DisplayName("Should get max stock product via GET endpoint")
+    void testGetMaxStockProduct() {
+        Product product = Product.builder()
+                .id("product-1")
+                .name("Test Product")
+                .stock(100)
+                .build();
+
+        when(getMaxStockProductUseCase.execute(anyString()))
+                .thenReturn(Flux.just(product));
+
+        webTestClient.get()
+                .uri("/api/franchises/franchise-1/products/max-stock")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(Product.class)
+                .value(responseList -> {
+                    assertThat(responseList).isNotEmpty();
+                    assertThat(responseList.get(0).getName()).isEqualTo("Test Product");
+                    assertThat(responseList.get(0).getStock()).isEqualTo(100);
+                });
     }
 }

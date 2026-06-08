@@ -92,6 +92,10 @@ class FranchiseHandlerTest {
                 .branches(new ArrayList<>())
                 .build();
 
+        CreateFranchiseRequest request = new CreateFranchiseRequest("Bancolombia Center", new ArrayList<>());
+
+        when(serverRequest.bodyToMono(CreateFranchiseRequest.class))
+                .thenReturn(Mono.just(request));
         when(createFranchiseUseCase.execute(any(Franchise.class)))
                 .thenReturn(Mono.just(franchise));
 
