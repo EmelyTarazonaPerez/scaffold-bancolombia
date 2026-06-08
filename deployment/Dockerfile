@@ -1,9 +1,9 @@
-FROM gradle:9.1.0-jdk21-alpine AS build
+FROM gradle:9.1.0-jdk25-alpine AS build
 WORKDIR /app
 COPY . .
 RUN gradle clean build -x test
 
-FROM eclipse-temurin:21-jdk-alpine
+FROM eclipse-temurin:25-jdk-alpine
 WORKDIR /app
 COPY --from=build /app/applications/app-service/build/libs/*.jar app.jar
 
