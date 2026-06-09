@@ -13,7 +13,7 @@ spring:
     include: null
   data:
       mongodb:
-        uri: mongodb+srv://emelydayannatp_db_user:3hqdbOaqN5aX8wIR@franchise.ffdctcj.mongodb.net/franchise?retryWrites=true&w=majority
+        uri: ${MONGODB_URI:mongodb://localhost:27017/franchise}
 management:
   endpoints:
     web:
