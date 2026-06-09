@@ -23,6 +23,17 @@ management:
     health:
       probes:
         enabled: true
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: list
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  show-actuator: false
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 resilience4j:
