@@ -1,0 +1,153 @@
+@startuml
+!define RECTANGLE class
+
+' ============================================
+' CAPA DE PRESENTACIÓN - Entry Points
+' ============================================
+package "Capa de Presentación\n(Entry Points)" #E8F5E9 {
+  component [RouterRest] <<Configuration>> #A5D6A7
+  component [FranchiseHandler] <<Component>> #81C784
+
+  package "DTOs Request/Response" {
+    [CreateFranchiseRequest]
+    [ProductInBranchRequest]
+    [ErrorResponse]
+  }
+}
+
+' ============================================
+' CAPA DE APLICACIÓN - Use Cases
+' ============================================
+package "Capa de Aplicación\n(Use Cases)" #E3F2FD {
+
+  package "Franchise Use Cases" {
+    [CreateFranchiseUseCase] <<UseCase>>
+    [UpdateFranchiseNameUseCase] <<UseCase>>
+  }
+
+  package "Branch Use Cases" {
+    [AddBranchUseCase] <<UseCase>>
+    [UpdateBranchNameUseCase] <<UseCase>>
+  }
+
+  package "Product Use Cases" {
+    [AddProductUseCase] <<UseCase>>
+    [DeleteProductUseCase] <<UseCase>>
+    [UpdateProductNameUseCase] <<UseCase>>
+    [UpdateProductStockUseCase] <<UseCase>>
+    [GetMaxStockProductUseCase] <<UseCase>>
+  }
+}
+
+' ============================================
+' CAPA DE DOMINIO - Models & Gateways
+' ============================================
+package "Capa de Dominio\n(Models & Gateways)" #FFF3E0 {
+
+  package "Domain Models" {
+    [Franchise\n- id: String\n- name: String\n- branches: List]
+    [Branch\n- id: String\n- name: String\n- products: List]
+    [Product\n- id: String\n- name: String\n- stock: Integer]
+  }
+
+  package "Gateway Interfaces" {
+    [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()]
+  }
+}
+
+' ============================================
+' CAPA DE INFRAESTRUCTURA - Repositories
+' ============================================
+package "Capa de Infraestructura\n(Driven Adapters)" #FCE4EC {
+
+  component [FranchiseRepositoryAdapter] <<Repository>> #F48FB1
+  component [FranchiseMongoRepository] <<ReactiveMongoRepository>> #EC407A
+
+  package "MongoDB Data Models" {
+    [FranchiseData] <<Document>>
+    [BranchData]
+    [Product (Mongo)]
+  }
+
+  database "MongoDB" {
+    [franchises]
+  }
+}
+
+' ============================================
+' DEPLOYMENT
+' ============================================
+package "Deployment" #F3E5F5 {
+  component [Docker Container] <<Container>> #CE93D8
+
+  cloud "AWS Cloud" #E1BEE7 {
+    component [ECS/EC2] <<Compute>> #BA68C8
+    database "MongoDB Atlas" #AB47BC
+  }
+}
+
+' ============================================
+' RELACIONES - CAPA DE PRESENTACIÓN
+' ============================================
+[RouterRest] --> [FranchiseHandler] : routes requests
+[FranchiseHandler] --> [CreateFranchiseRequest] : uses
+[FranchiseHandler] --> [ProductInBranchRequest] : uses
+[FranchiseHandler] --> [ErrorResponse] : returns
+
+' ============================================
+' RELACIONES - HANDLER A USE CASES
+' ============================================
+[FranchiseHandler] --> [CreateFranchiseUseCase]
+[FranchiseHandler] --> [UpdateFranchiseNameUseCase]
+[FranchiseHandler] --> [AddBranchUseCase]
+[FranchiseHandler] --> [UpdateBranchNameUseCase]
+[FranchiseHandler] --> [AddProductUseCase]
+[FranchiseHandler] --> [DeleteProductUseCase]
+[FranchiseHandler] --> [UpdateProductNameUseCase]
+[FranchiseHandler] --> [UpdateProductStockUseCase]
+[FranchiseHandler] --> [GetMaxStockProductUseCase]
+
+' ============================================
+' RELACIONES - USE CASES A DOMAIN
+' ============================================
+[CreateFranchiseUseCase] --> [Franchise\n- id: String\n- name: String\n- branches: List]
+[UpdateFranchiseNameUseCase] --> [Franchise\n- id: String\n- name: String\n- branches: List]
+[AddBranchUseCase] --> [Branch\n- id: String\n- name: String\n- products: List]
+[UpdateBranchNameUseCase] --> [Branch\n- id: String\n- name: String\n- products: List]
+[AddProductUseCase] --> [Product\n- id: String\n- name: String\n- stock: Integer]
+[DeleteProductUseCase] --> [Product\n- id: String\n- name: String\n- stock: Integer]
+[UpdateProductNameUseCase] --> [Product\n- id: String\n- name: String\n- stock: Integer]
+[UpdateProductStockUseCase] --> [Product\n- id: String\n- name: String\n- stock: Integer]
+[GetMaxStockProductUseCase] --> [Product\n- id: String\n- name: String\n- stock: Integer]
+
+' ============================================
+' RELACIONES - USE CASES A GATEWAYS
+' ============================================
+[CreateFranchiseUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+[UpdateFranchiseNameUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+[AddBranchUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+[UpdateBranchNameUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+[AddProductUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+[DeleteProductUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+[UpdateProductNameUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+[UpdateProductStockUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+[GetMaxStockProductUseCase] --> [FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] : uses
+
+' ============================================
+' RELACIONES - INFRAESTRUCTURA
+' ============================================
+[FranchiseRepository\n+ save()\n+ findById()\n+ deleteById()] <|-- [FranchiseRepositoryAdapter] : implements
+[FranchiseRepositoryAdapter] --> [FranchiseMongoRepository] : uses
+[FranchiseRepositoryAdapter] --> [FranchiseData] : maps to/from
+[FranchiseMongoRepository] --> [franchises] : persists
+[FranchiseData] --> [BranchData]
+[BranchData] --> [Product (Mongo)]
+
+' ============================================
+' RELACIONES - DEPLOYMENT
+' ============================================
+[Docker Container] --> [ECS/EC2] : deploys to
+[FranchiseRepositoryAdapter] ..> [MongoDB Atlas] : connects to
+[FranchiseMongoRepository] ..> [MongoDB Atlas] : reactive connection
+
+@enduml
