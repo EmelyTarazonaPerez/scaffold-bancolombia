@@ -1,5 +1,6 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.model.franchise.Franchise;
 import co.com.bancolombia.usecase.franchise.CreateFranchiseUseCase;
 import co.com.bancolombia.usecase.franchise.UpdateFranchiseNameUseCase;
 import co.com.bancolombia.usecase.branch.AddBranchUseCase;
@@ -9,6 +10,7 @@ import co.com.bancolombia.usecase.product.DeleteProductUseCase;
 import co.com.bancolombia.usecase.product.UpdateProductStockUseCase;
 import co.com.bancolombia.usecase.product.UpdateProductNameUseCase;
 import co.com.bancolombia.usecase.product.GetMaxStockProductUseCase;
+import co.com.bancolombia.api.validator.RequestValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -37,6 +38,7 @@ public class FranchiseHandler {
     private final UpdateProductStockUseCase updateProductStockUseCase;
     private final UpdateProductNameUseCase updateProductNameUseCase;
     private final GetMaxStockProductUseCase getMaxStockProductUseCase;
+    private final RequestValidator requestValidator;
     private final ExceptionHandler exceptionHandler;
 
     @Operation(summary = "Create a new franchise",
@@ -47,10 +49,20 @@ public class FranchiseHandler {
             @ApiResponse(responseCode = "400", description = "Invalid request")
     })
     public Mono<ServerResponse> createFranchise(ServerRequest request) {
+        System.out.println("Received request to create franchise");
         return request.bodyToMono(CreateFranchiseRequest.class)
-                .flatMap(dto ->
-                        createFranchiseUseCase.execute(dto.toFranchise())
+                .flatMap(requestValidator::validate)
+                .flatMap(dto -> {
+                    Mono<Franchise> model = createFranchiseUseCase.execute(dto.toFranchise());
+                    System.out.println("Creating franchise with name: " + model);
+
+                            return  model;
+                        }
                 )
+                .doOnNext(model -> {
+                    System.out.println("Franchise created successfully: " + model.getId());
+                    System.out.println("Franchise details: " + model.getName());
+                })
                 .flatMap(franchise ->
                         ServerResponse.ok().bodyValue(franchise)
                 )
@@ -68,6 +80,7 @@ public class FranchiseHandler {
             @Parameter(description = "Franchise ID") ServerRequest request) {
         String franchiseId = request.pathVariable("franchiseId");
         return request.bodyToMono(UpdateFranchiseNameRequest.class)
+                .flatMap(requestValidator::validate)
                 .flatMap(dto ->
                         updateFranchiseNameUseCase.execute(franchiseId, dto.newName())
                 )
@@ -87,6 +100,7 @@ public class FranchiseHandler {
     public Mono<ServerResponse> addBranch(ServerRequest request) {
         String franchiseId = request.pathVariable("franchiseId");
         return request.bodyToMono(AddBranchRequest.class)
+                .flatMap(requestValidator::validate)
                 .flatMap(dto ->
                         addBranchUseCase.execute(franchiseId, dto.toBranch())
                 )
@@ -107,6 +121,7 @@ public class FranchiseHandler {
         String franchiseId = request.pathVariable("franchiseId");
         String branchId = request.pathVariable("branchId");
         return request.bodyToMono(UpdateBranchNameRequest.class)
+                .flatMap(requestValidator::validate)
                 .flatMap(dto ->
                         updateBranchNameUseCase.execute(franchiseId, branchId, dto.newName())
                 )
@@ -127,6 +142,7 @@ public class FranchiseHandler {
         String franchiseId = request.pathVariable("franchiseId");
         String branchId = request.pathVariable("branchId");
         return request.bodyToMono(AddProductRequest.class)
+                .flatMap(requestValidator::validate)
                 .flatMap(dto ->
                         addProductUseCase.execute(franchiseId, branchId, dto.toProduct())
                 )
@@ -148,9 +164,7 @@ public class FranchiseHandler {
         String branchId = request.pathVariable("branchId");
         String productId = request.pathVariable("productId");
         return deleteProductUseCase.execute(franchiseId, branchId, productId)
-                .flatMap(v ->
-                        ServerResponse.noContent().build()
-                )
+                .then(ServerResponse.noContent().build())
                 .onErrorResume(exceptionHandler::handleException);
     }
 
@@ -166,6 +180,7 @@ public class FranchiseHandler {
         String branchId = request.pathVariable("branchId");
         String productId = request.pathVariable("productId");
         return request.bodyToMono(UpdateProductStockRequest.class)
+                .flatMap(requestValidator::validate)
                 .flatMap(dto ->
                         updateProductStockUseCase.execute(franchiseId, branchId, productId, dto.newStock())
                 )
@@ -187,6 +202,7 @@ public class FranchiseHandler {
         String branchId = request.pathVariable("branchId");
         String productId = request.pathVariable("productId");
         return request.bodyToMono(UpdateProductNameRequest.class)
+                .flatMap(requestValidator::validate)
                 .flatMap(dto ->
                         updateProductNameUseCase.execute(franchiseId, branchId, productId, dto.newName())
                 )
@@ -206,7 +222,6 @@ public class FranchiseHandler {
     public Mono<ServerResponse> getMaxStockProduct(ServerRequest request) {
         String franchiseId = request.pathVariable("franchiseId");
         return getMaxStockProductUseCase.execute(franchiseId)
-                .collectList()
                 .flatMap(product -> ServerResponse.ok().bodyValue(product))
                 .onErrorResume(exceptionHandler::handleException);
     }
