@@ -8,6 +8,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
@@ -62,6 +63,20 @@ public class FranchiseRepositoryAdapter
         return repository.existsById(id)
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .onErrorResume(ex -> handleError(ex, "check franchise existence by id: " + id));
+    }
+
+    @Override
+    public Mono<Franchise> findMaxStockProductByBranch(String franchiseId) {
+        return repository.findMaxStockProductByBranch(franchiseId)
+                .map(data -> {
+                    Franchise franchise = mapper.map(data, Franchise.class);
+                    franchise.setId(franchiseId);
+                    return franchise;
+                })
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                .onErrorResume(ex ->
+                        handleError(ex, "find max stock product by branch: " + franchiseId)
+                );
     }
 
     private <T> Mono<T> handleError(Throwable ex, String operation) {

@@ -11,4 +11,5 @@ public interface FranchiseRepository {
     Mono<Void> deleteById(String id);
 
     Mono<Boolean> existsById(String id);
+    Mono<Franchise> findMaxStockProductByBranch(String branchId);
 }
