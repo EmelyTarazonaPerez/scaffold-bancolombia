@@ -1,5 +1,8 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.validator.ConstraintViolationException;
+import co.com.bancolombia.api.validator.NullRequestException;
+import co.com.bancolombia.api.validator.ValidationException;
 import co.com.bancolombia.model.exception.BusinessRuleException;
 import co.com.bancolombia.model.exception.DomainException;
 import co.com.bancolombia.model.exception.InvalidInputException;
@@ -26,7 +29,13 @@ public class ExceptionHandler {
     public Mono<ServerResponse> handleException(Throwable throwable) {
         log.error("Exception occurred", throwable);
 
-        if (throwable instanceof ServiceUnavailableException serviceUnavailable) {
+        if (throwable instanceof ConstraintViolationException constraintViolation) {
+            return handleConstraintViolation(constraintViolation);
+        } else if (throwable instanceof NullRequestException nullRequest) {
+            return handleNullRequest(nullRequest);
+        } else if (throwable instanceof ValidationException validation) {
+            return handleValidationException(validation);
+        } else if (throwable instanceof ServiceUnavailableException serviceUnavailable) {
             return handleServiceUnavailable(serviceUnavailable);
         } else if (throwable instanceof ResourceNotFoundException notFound) {
             return handleResourceNotFound(notFound);
@@ -41,6 +50,47 @@ public class ExceptionHandler {
         } else {
             return handleUnexpectedError(throwable);
         }
+    }
+
+    private Mono<ServerResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        log.warn("Constraint violation detected: {}", ex.getViolations());
+        ErrorResponse error = new ErrorResponse(
+                "VALIDATION_ERROR",
+                "The request contains validation errors. Please check the violations for details",
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getViolations()
+        );
+        return ServerResponse
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
+    }
+
+    private Mono<ServerResponse> handleNullRequest(NullRequestException ex) {
+        log.warn("Null request detected");
+        ErrorResponse error = new ErrorResponse(
+                "NULL_REQUEST",
+                "The request body cannot be null",
+                HttpStatus.BAD_REQUEST.value()
+        );
+        return ServerResponse
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
+    }
+
+    private Mono<ServerResponse> handleValidationException(ValidationException ex) {
+        log.warn("Validation exception: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+                "VALIDATION_ERROR",
+                ex.getMessage() != null ? ex.getMessage() : "Validation error occurred",
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getViolations()
+        );
+        return ServerResponse
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(error);
     }
 
     private Mono<ServerResponse> handleServiceUnavailable(ServiceUnavailableException ex) {

@@ -2,14 +2,21 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.model.product.Product;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.util.UUID;
 
 @Schema(description = "Request to add a new product to a branch")
 public record AddProductRequest(
         @Schema(description = "Product name", example = "Premium Credit Card")
+        @NotNull(message = "Product name cannot be null")
+        @NotEmpty(message = "Product name cannot be empty")
         String name,
         @Schema(description = "Initial product stock", example = "100")
+        @NotNull(message = "Stock cannot be null")
+        @Positive(message = "Stock must be a positive number")
         Integer stock
 ) {
     public Product toProduct() {
