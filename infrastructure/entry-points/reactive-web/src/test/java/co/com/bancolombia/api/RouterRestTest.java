@@ -1,7 +1,8 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.validator.RequestValidator;
+import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.product.Product;
 import co.com.bancolombia.usecase.branch.AddBranchUseCase;
 import co.com.bancolombia.usecase.branch.UpdateBranchNameUseCase;
 import co.com.bancolombia.usecase.franchise.CreateFranchiseUseCase;
@@ -15,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,6 +59,9 @@ class RouterRestTest {
     @Mock
     private GetMaxStockProductUseCase getMaxStockProductUseCase;
 
+    @Mock
+    private RequestValidator requestValidator;
+
     @BeforeEach
     void setUp() {
         ExceptionHandler exceptionHandler = new ExceptionHandler();
@@ -71,6 +75,7 @@ class RouterRestTest {
                 updateProductStockUseCase,
                 updateProductNameUseCase,
                 getMaxStockProductUseCase,
+                requestValidator,
                 exceptionHandler
         );
 
@@ -80,9 +85,15 @@ class RouterRestTest {
                 .build();
     }
 
+    private void configureRequestValidatorMock() {
+        when(requestValidator.validate(any())).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+    }
+
     @Test
     @DisplayName("Should create franchise via POST endpoint")
     void testCreateFranchise() {
+        configureRequestValidatorMock();
+
         Franchise franchise = Franchise.builder()
                 .id("franchise-1")
                 .name("Test Franchise")
@@ -108,6 +119,8 @@ class RouterRestTest {
     @Test
     @DisplayName("Should update franchise name via PUT endpoint")
     void testUpdateFranchiseName() {
+        configureRequestValidatorMock();
+
         Franchise franchise = Franchise.builder()
                 .id("franchise-1")
                 .name("Updated Franchise")
@@ -133,25 +146,28 @@ class RouterRestTest {
     @Test
     @DisplayName("Should get max stock product via GET endpoint")
     void testGetMaxStockProduct() {
-        Product product = Product.builder()
-                .id("product-1")
-                .name("Test Product")
-                .stock(100)
+        Franchise franchise = Franchise.builder()
+                .id("franchise-1")
+                .name("Test Franchise")
+                .branches(List.of(Branch.builder()
+                        .id("branch-1")
+                        .name("Branch 1")
+                        .build()))
                 .build();
 
         when(getMaxStockProductUseCase.execute(anyString()))
-                .thenReturn(Flux.just(product));
+                .thenReturn(Mono.just(franchise));
 
         webTestClient.get()
                 .uri("/api/franchises/franchise-1/products/max-stock")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBodyList(Product.class)
-                .value(responseList -> {
-                    assertThat(responseList).isNotEmpty();
-                    assertThat(responseList.get(0).getName()).isEqualTo("Test Product");
-                    assertThat(responseList.get(0).getStock()).isEqualTo(100);
+                .expectBody(Franchise.class)
+                .value(response -> {
+                    assertThat(response.getId()).isEqualTo("franchise-1");
+                    assertThat(response.getBranches()).isNotEmpty();
                 });
     }
+
 }
