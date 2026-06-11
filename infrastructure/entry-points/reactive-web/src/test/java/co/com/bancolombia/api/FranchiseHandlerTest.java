@@ -1,8 +1,7 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.model.branch.Branch;
+import co.com.bancolombia.api.validator.RequestValidator;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.product.Product;
 import co.com.bancolombia.usecase.franchise.CreateFranchiseUseCase;
 import co.com.bancolombia.usecase.franchise.UpdateFranchiseNameUseCase;
 import co.com.bancolombia.usecase.branch.AddBranchUseCase;
@@ -25,7 +24,6 @@ import reactor.test.StepVerifier;
 import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +65,9 @@ class FranchiseHandlerTest {
     @Mock
     private ServerRequest serverRequest;
 
+    @Mock
+    private RequestValidator requestValidator;
+
     @BeforeEach
     void setUp() {
         franchiseHandler = new FranchiseHandler(
@@ -79,6 +80,7 @@ class FranchiseHandlerTest {
                 updateProductStockUseCase,
                 updateProductNameUseCase,
                 getMaxStockProductUseCase,
+                requestValidator,
                 exceptionHandler
         );
     }
@@ -96,12 +98,16 @@ class FranchiseHandlerTest {
 
         when(serverRequest.bodyToMono(CreateFranchiseRequest.class))
                 .thenReturn(Mono.just(request));
+        when(requestValidator.validate(any(CreateFranchiseRequest.class)))
+                .thenReturn(Mono.just(request));
         when(createFranchiseUseCase.execute(any(Franchise.class)))
                 .thenReturn(Mono.just(franchise));
 
         franchiseHandler.createFranchise(serverRequest)
                 .as(StepVerifier::create)
-                .expectNextCount(1)
+                .assertNext(response -> {
+                    assert response.statusCode().is2xxSuccessful();
+                })
                 .verifyComplete();
     }
 
