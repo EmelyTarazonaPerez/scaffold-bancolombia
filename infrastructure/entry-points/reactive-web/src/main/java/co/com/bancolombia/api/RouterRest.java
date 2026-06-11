@@ -12,7 +12,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(FranchiseHandler handler) {
-        return route(GET("/health"), request ->
+        return route(GET("/actuator/health"), request ->
                 ServerResponse.ok().bodyValue("OK"))
                 .andRoute(POST("/api/franchises"), handler::createFranchise)
                 .andRoute(PUT("/api/franchises/{franchiseId}"), handler::updateFranchiseName)
