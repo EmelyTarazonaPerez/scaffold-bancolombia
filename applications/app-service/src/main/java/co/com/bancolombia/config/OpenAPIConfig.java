@@ -8,15 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
-/**
- * Configuración global de OpenAPI/Swagger para WebFlux Funcional.
- *
- * La documentación se genera desde:
- * 1. Anotaciones @RouterOperations en RouterRest (mapeo de rutas)
- * 2. Anotaciones @Operation en FranchiseHandler (detalles del endpoint)
- * 3. Anotaciones @Schema en DTOs (estructura de request/response)
- * 4. Esta clase (metadatos globales: título, versión, contacto, licencia)
- */
 @Configuration
 public class OpenAPIConfig {
 

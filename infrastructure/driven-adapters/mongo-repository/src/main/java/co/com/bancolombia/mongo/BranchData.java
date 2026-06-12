@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class BranchData {
-    @Id
     private String id;
     private String name;
-    @Builder.Default
-    private List<Product> products = new ArrayList<>();
+    private Flux<ProductData> products;
 }

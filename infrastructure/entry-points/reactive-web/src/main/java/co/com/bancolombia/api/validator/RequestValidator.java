@@ -3,6 +3,7 @@ package co.com.bancolombia.api.validator;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -11,13 +12,14 @@ import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class RequestValidator {
 
     private final Validator validator;
 
     public <T> Mono<T> validate(T request) {
         if (request == null) {
-            System.out.println("Request is null");
+            log.info("Request is null");
             return Mono.error(new NullRequestException());
         }
 
@@ -30,7 +32,7 @@ public class RequestValidator {
 
             return Mono.error(new ConstraintViolationException(violationMessages));
         }
-        System.out.println("Request is valid: " + request);
+        log.info("Request is valid: " + request);
         return Mono.just(request);
     }
 

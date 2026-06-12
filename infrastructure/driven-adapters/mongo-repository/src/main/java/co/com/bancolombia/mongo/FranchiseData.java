@@ -1,5 +1,6 @@
 package co.com.bancolombia.mongo;
 
+import co.com.bancolombia.mongo.utils.Constans;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Document("franchises")
+@Document(Constans.FRANCHISES_COLLECTION)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
