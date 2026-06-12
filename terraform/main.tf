@@ -43,7 +43,7 @@ module "compute" {
 
   project_name                = var.project_name
   aws_region                  = var.aws_region
-  container_image             = "${module.container_registry.repository_url}:${var.image_tag}"
+  container_image             = "${module.container_registry.repository_url}:latest"
   container_port              = var.container_port
   task_cpu                    = var.task_cpu
   task_memory                 = var.task_memory
