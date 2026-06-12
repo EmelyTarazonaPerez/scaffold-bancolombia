@@ -1,0 +1,142 @@
+# CI/CD con GitHub Actions + AWS OIDC
+
+## ¿Por qué OIDC es mejor que Access Keys?
+
+### Con Access Keys (❌ NO recomendado)
+- Necesitas guardar AWS_ACCESS_KEY_ID y AWS_SECRET_ACCESS_KEY en GitHub
+- Las credenciales quedan expuestas en los logs
+- Difícil de rotar las credenciales
+- Mayor riesgo de seguridad si se compromete la clave
+
+### Con OIDC (✅ Recomendado)
+- No hay credenciales estáticas almacenadas
+- GitHub genera tokens JWT de corta duración
+- AWS valida el token usando OIDC
+- Las credenciales se generan bajo demanda
+- Máxima seguridad y cumplimiento
+
+## Cómo funciona el flujo OIDC
+
+1. **GitHub Actions ejecuta tu workflow**
+   - El job obtiene un token JWT de GitHub firmado
+
+2. **GitHub Actions llama a AWS STS**
+   - Envía el token JWT a AWS
+   - Dice: "Quiero asumir el rol con este token"
+
+3. **AWS valida el token**
+   - AWS verifica la firma digital del token
+   - Comprueba que:
+     * El issuer es `token.actions.githubusercontent.com`
+     * El repositorio coincide: `repo:owner/repo:ref:refs/heads/main`
+     * La audiencia es `sts.amazonaws.com`
+
+4. **AWS emite credenciales temporales**
+   - Si todo es correcto, genera una sesión temporal
+   - Credenciales válidas por 1 hora aproximadamente
+
+5. **GitHub Actions usa las credenciales**
+   - Ejecuta docker build, push, update ECS con permisos limitados
+
+## Pasos para implementar
+
+### 1. Aplicar Terraform
+```bash
+cd terraform
+terraform init
+terraform apply
+```
+
+### 2. Obtener el ARN del rol
+```bash
+terraform output github_actions_role_arn
+# Copia este valor
+```
+
+### 3. Obtener tu ID de cuenta AWS
+```bash
+terraform output
+# Busca en los outputs de AWS
+# O usa AWS CLI:
+aws sts get-caller-identity --query Account --output text
+```
+
+### 4. Configurar Secrets en GitHub
+Ve a tu repositorio en GitHub:
+1. Settings > Secrets and variables > Actions
+2. New repository secret:
+   - Name: `AWS_ROLE_ARN`
+   - Value: (el ARN que copiaste en paso 2)
+3. New repository secret:
+   - Name: `AWS_ACCOUNT_ID`
+   - Value: (tu ID de cuenta de paso 3)
+
+### 5. Hacer push a main
+```bash
+git push origin main
+```
+
+## El workflow hace lo siguiente
+
+Cuando hagas push a `main`:
+
+1. **Checkout** - Descarga tu código
+2. **Configure AWS credentials** - Asume el rol usando OIDC
+3. **Login to ECR** - Se autentica en ECR
+4. **Build Docker image** - Compila tu aplicación
+5. **Push Docker image** - Sube la imagen a ECR
+6. **Update ECS service** - Actualiza el servicio con la nueva imagen
+
+## Permisos que tiene el rol de GitHub Actions
+
+✅ Push a ECR (subir imágenes)
+✅ Update ECS services (actualizar tareas)
+✅ Read CloudWatch logs (ver logs)
+✅ Terraform state (si configuras S3 backend)
+
+## Seguridad adicional
+
+### Restricción por repositorio
+```
+repo:emelytarazona-netizen/franchise-api:ref:refs/heads/main
+```
+- Solo este repositorio
+- Solo desde la rama `main`
+
+### Restricción por AWS
+El rol SOLO puede:
+- Acceder al ECR de `franchise-api`
+- Actualizar el servicio ECS específico
+- Nada más
+
+## Verificar que funciona
+
+1. Haz un push a `main`
+2. Ve a GitHub > Actions tab
+3. Mira el workflow ejecutarse
+4. Si todo va bien, verás el nuevo commit de la imagen en ECR
+5. El servicio ECS se actualizará automáticamente
+
+## Troubleshooting
+
+### Error: "AssumeRole failed"
+- Verifica que el ARN del rol sea correcto
+- Verifica que el secret AWS_ROLE_ARN esté configurado
+
+### Error: "ECR push failed"
+- Verifica que AWS_ACCOUNT_ID sea correcto
+- Verifica que el repositorio ECR exista
+
+### Error: "ECS update failed"
+- Verifica que el cluster y servicio ECS existan
+- Verifica que el rol tenga permisos de update
+
+## Próximos pasos
+
+1. ✅ Terraform plan/apply del módulo cicd
+2. ✅ Configurar secrets en GitHub
+3. ✅ Hacer push a main para disparar el workflow
+4. ✅ Verificar que la imagen se sube a ECR
+5. ✅ Verificar que ECS se actualiza
+6. ✅ Acceder a la URL pública para ver la nueva versión
+
