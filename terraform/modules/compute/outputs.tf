@@ -1,35 +1,35 @@
 output "ecs_cluster_name" {
-  description = "Nombre del cluster ECS"
+  description = "Name the cluster ECS"
   value       = aws_ecs_cluster.main.name
 }
 
 output "ecs_cluster_arn" {
-  description = "ARN del cluster ECS"
+  description = "ARN of cluster ECS"
   value       = aws_ecs_cluster.main.arn
 }
 
 output "ecs_service_name" {
-  description = "Nombre del servicio ECS"
+  description = "Name of servicio ECS"
   value       = aws_ecs_service.app.name
 }
 
 output "ecs_service_arn" {
-  description = "ARN del servicio ECS"
+  description = "ARN of service ECS"
   value       = aws_ecs_service.app.arn
 }
 
 output "task_definition_arn" {
-  description = "ARN de la task definition"
+  description = "ARN of the task definition"
   value       = aws_ecs_task_definition.app.arn
 }
 
 output "task_execution_role_arn" {
-  description = "ARN del rol de ejecución de tareas"
+  description = "ARN of rol the ejecución de tareas"
   value       = aws_iam_role.ecs_task_execution_role.arn
 }
 
 output "log_group_name" {
-  description = "Nombre del log group de CloudWatch"
+  description = "Name the log group of CloudWatch"
   value       = aws_cloudwatch_log_group.app.name
 }
 

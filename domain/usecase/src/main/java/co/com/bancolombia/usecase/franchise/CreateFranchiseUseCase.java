@@ -14,6 +14,12 @@ public class CreateFranchiseUseCase {
     }
 
     public Mono<Franchise> execute(Franchise franchise) {
-        return franchiseRepository.save(franchise);
+        return Mono.just(franchise)
+                .filter(item -> item.getName() != null && !item.getName().isBlank())
+                .switchIfEmpty(Mono.error(new InvalidInputException(
+                        "INVALID_FRANCHISE_NAME",
+                        "Franchise name is required"
+                )))
+                .flatMap(franchiseRepository::save);
     }
 }
