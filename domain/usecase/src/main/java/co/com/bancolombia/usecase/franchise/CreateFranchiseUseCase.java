@@ -16,7 +16,6 @@ public class CreateFranchiseUseCase {
     }
 
     public Mono<Franchise> execute(Franchise franchise) {
-        franchise.setId(UUID.randomUUID().toString());
         return Mono.just(franchise)
                 .filter(item -> item.getName() != null && !item.getName().isBlank())
                 .switchIfEmpty(Mono.error(new InvalidInputException(
