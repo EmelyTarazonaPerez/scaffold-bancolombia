@@ -42,7 +42,8 @@ data "aws_iam_policy_document" "github_ecr_policy" {
   statement {
     effect = "Allow"
     actions = [
-      "ecr:GetAuthorizationToken"
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability"
     ]
     resources = ["*"]
   }

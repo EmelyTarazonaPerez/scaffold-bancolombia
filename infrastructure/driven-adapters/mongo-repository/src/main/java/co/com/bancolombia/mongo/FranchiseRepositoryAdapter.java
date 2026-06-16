@@ -70,11 +70,7 @@ public class FranchiseRepositoryAdapter
     @Override
     public Mono<Franchise> findMaxStockProductByBranch(String franchiseId) {
         return repository.findMaxStockProductByBranch(franchiseId)
-                .map(data -> {
-                    Franchise franchise = mapper.map(data, Franchise.class);
-                    franchise.setId(franchiseId);
-                    return franchise;
-                })
+                .map(data -> mapper.map(data, Franchise.class))
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .onErrorMap(this::isInfrastructureError,
                         ex -> handleError(ex,

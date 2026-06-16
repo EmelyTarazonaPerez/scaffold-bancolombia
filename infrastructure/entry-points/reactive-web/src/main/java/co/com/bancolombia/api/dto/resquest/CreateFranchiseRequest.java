@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Schema(description = "Request to create a new franchise with branches and products")
@@ -26,7 +25,6 @@ public record CreateFranchiseRequest(
                 : new ArrayList<>();
 
         return Franchise.builder()
-                .id(UUID.randomUUID().toString())
                 .name(name)
                 .branches(branchList)
                 .build();

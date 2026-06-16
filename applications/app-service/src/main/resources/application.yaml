@@ -13,7 +13,7 @@ spring:
     include: null
   data:
       mongodb:
-        uri: NONE
+        uri: ${MONGODB_URI}
 management:
   endpoints:
     web:
