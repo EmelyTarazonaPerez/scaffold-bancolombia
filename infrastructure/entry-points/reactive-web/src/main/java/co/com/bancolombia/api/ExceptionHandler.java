@@ -8,6 +8,7 @@ import co.com.bancolombia.model.exception.DomainException;
 import co.com.bancolombia.model.exception.InvalidInputException;
 import co.com.bancolombia.model.exception.ResourceNotFoundException;
 import co.com.bancolombia.model.exception.ServiceUnavailableException;
+import co.com.bancolombia.api.utils.Constans;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,17 +16,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-/**
- * Handles exceptions and converts them to appropriate HTTP responses
- * Ensures no technical details are exposed to clients
- */
 @Slf4j
 @Component
 public class ExceptionHandler {
 
-    /**
-     * Handles domain exceptions and returns appropriate HTTP responses
-     */
     public Mono<ServerResponse> handleException(Throwable throwable) {
         log.error("Exception occurred", throwable);
 
@@ -55,8 +49,8 @@ public class ExceptionHandler {
     private Mono<ServerResponse> handleConstraintViolation(ConstraintViolationException ex) {
         log.warn("Constraint violation detected: {}", ex.getViolations());
         ErrorResponse error = new ErrorResponse(
-                "VALIDATION_ERROR",
-                "The request contains validation errors. Please check the violations for details",
+                Constans.ERROR_CODE_VALIDATION_ERROR,
+                Constans.VALIDATION_ERRORS_MESSAGE,
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getViolations()
         );
@@ -69,8 +63,8 @@ public class ExceptionHandler {
     private Mono<ServerResponse> handleNullRequest(NullRequestException ex) {
         log.warn("Null request detected");
         ErrorResponse error = new ErrorResponse(
-                "NULL_REQUEST",
-                "The request body cannot be null",
+                Constans.ERROR_CODE_NULL_REQUEST,
+                Constans.NULL_REQUEST_MESSAGE,
                 HttpStatus.BAD_REQUEST.value()
         );
         return ServerResponse
@@ -82,8 +76,8 @@ public class ExceptionHandler {
     private Mono<ServerResponse> handleValidationException(ValidationException ex) {
         log.warn("Validation exception: {}", ex.getMessage());
         ErrorResponse error = new ErrorResponse(
-                "VALIDATION_ERROR",
-                ex.getMessage() != null ? ex.getMessage() : "Validation error occurred",
+                Constans.ERROR_CODE_VALIDATION_ERROR,
+                ex.getMessage() != null ? ex.getMessage() : Constans.VALIDATION_ERROR_MESSAGE,
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getViolations()
         );
@@ -109,7 +103,7 @@ public class ExceptionHandler {
     private Mono<ServerResponse> handleResourceNotFound(ResourceNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(
                 ex.getErrorCode(),
-                "The requested resource was not found",
+                Constans.REQUESTED_RESOURCE_NOT_FOUND,
                 HttpStatus.NOT_FOUND.value()
         );
         return ServerResponse
@@ -121,7 +115,7 @@ public class ExceptionHandler {
     private Mono<ServerResponse> handleInvalidInput(InvalidInputException ex) {
         ErrorResponse error = new ErrorResponse(
                 ex.getErrorCode(),
-                "The provided input is invalid. Please verify your request data",
+                Constans.PROVIDED_INPUT_INVALID,
                 HttpStatus.BAD_REQUEST.value()
         );
         return ServerResponse
@@ -133,7 +127,7 @@ public class ExceptionHandler {
     private Mono<ServerResponse> handleBusinessRule(BusinessRuleException ex) {
         ErrorResponse error = new ErrorResponse(
                 ex.getErrorCode(),
-                "The operation violates a business rule. Please check your request",
+                Constans.OPERATION_VIOLATES_BUSINESS_RULE,
                 HttpStatus.BAD_REQUEST.value()
         );
         return ServerResponse
@@ -144,8 +138,8 @@ public class ExceptionHandler {
 
     private Mono<ServerResponse> handleIllegalArgument(IllegalArgumentException ex) {
         ErrorResponse error = new ErrorResponse(
-                "INVALID_INPUT",
-                "The provided input is invalid. Please verify your request data",
+                Constans.ERROR_CODE_INVALID_INPUT,
+                Constans.PROVIDED_INPUT_INVALID,
                 HttpStatus.BAD_REQUEST.value()
         );
         return ServerResponse
@@ -157,7 +151,7 @@ public class ExceptionHandler {
     private Mono<ServerResponse> handleDomainException(DomainException ex) {
         ErrorResponse error = new ErrorResponse(
                 ex.getErrorCode(),
-                "An error occurred while processing your request",
+                Constans.ERROR_PROCESSING_REQUEST,
                 HttpStatus.BAD_REQUEST.value()
         );
         return ServerResponse

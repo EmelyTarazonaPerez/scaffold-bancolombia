@@ -13,8 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
-    @Id
+public class ProductData {
     private String id;
     private String name;
     private Integer stock;
