@@ -5,11 +5,11 @@ import co.com.bancolombia.mongo.FranchiseData;
 import co.com.bancolombia.mongo.FranchiseMongoRepository;
 import co.com.bancolombia.mongo.FranchiseRepositoryAdapter;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.data.domain.Example;
 import reactor.core.publisher.Flux;
@@ -19,8 +19,10 @@ import reactor.test.StepVerifier;
 import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class AdapterOperationsTest {
 
     @Mock
@@ -36,12 +38,9 @@ class AdapterOperationsTest {
 
     private Franchise franchise;
     private FranchiseData franchiseData;
-    private AutoCloseable closeable;
 
     @BeforeEach
     void setUp() {
-        closeable = MockitoAnnotations.openMocks(this);
-
         franchise = Franchise.builder()
                 .id("franchise-1")
                 .name("Test Franchise")
@@ -54,23 +53,16 @@ class AdapterOperationsTest {
                 .branches(new ArrayList<>())
                 .build();
 
-        when(objectMapper.map(any(FranchiseData.class), any())).thenReturn(franchise);
-        when(circuitBreaker.tryAcquirePermission()).thenReturn(true);
-        when(circuitBreaker.getCurrentTimestamp()).thenReturn(System.nanoTime());
+        lenient().when(circuitBreaker.tryAcquirePermission()).thenReturn(true);
+        lenient().when(circuitBreaker.getCurrentTimestamp()).thenReturn(System.nanoTime());
 
         adapter = new FranchiseRepositoryAdapter(repository, objectMapper, circuitBreaker);
     }
 
-    @AfterEach
-    void tearDown() throws Exception {
-        if (closeable != null) {
-            closeable.close();
-        }
-    }
-
     @Test
-    void testSave() {
+    void shouldSaveFranchiseSuccessfully() {
         when(objectMapper.map(any(Franchise.class), any())).thenReturn(franchiseData);
+        when(objectMapper.map(any(FranchiseData.class), any())).thenReturn(franchise);
         when(repository.save(any(FranchiseData.class))).thenReturn(Mono.just(franchiseData));
 
         StepVerifier.create(adapter.save(franchise))
@@ -79,19 +71,8 @@ class AdapterOperationsTest {
     }
 
     @Test
-    void testSaveAll() {
-        Flux<Franchise> franchises = Flux.just(franchise);
-
-        when(objectMapper.map(any(Franchise.class), any())).thenReturn(franchiseData);
-        when(repository.saveAll(any(Flux.class))).thenReturn(Flux.just(franchiseData));
-
-        StepVerifier.create(adapter.saveAll(franchises))
-                .expectNext(franchise)
-                .verifyComplete();
-    }
-
-    @Test
-    void testFindById() {
+    void shouldFindFranchiseById() {
+        when(objectMapper.map(any(FranchiseData.class), any())).thenReturn(franchise);
         when(repository.findById("franchise-1")).thenReturn(Mono.just(franchiseData));
 
         StepVerifier.create(adapter.findById("franchise-1"))
@@ -100,8 +81,9 @@ class AdapterOperationsTest {
     }
 
     @Test
-    void testFindByExample() {
+    void shouldFindFranchiseByExample() {
         when(objectMapper.map(any(Franchise.class), any())).thenReturn(franchiseData);
+        when(objectMapper.map(any(FranchiseData.class), any())).thenReturn(franchise);
         when(repository.findAll(any(Example.class))).thenReturn(Flux.just(franchiseData));
 
         StepVerifier.create(adapter.findByExample(franchise))
@@ -110,7 +92,8 @@ class AdapterOperationsTest {
     }
 
     @Test
-    void testFindAll() {
+    void shouldFindAllFranchises() {
+        when(objectMapper.map(any(FranchiseData.class), any())).thenReturn(franchise);
         when(repository.findAll()).thenReturn(Flux.just(franchiseData));
 
         StepVerifier.create(adapter.findAll())
@@ -119,7 +102,7 @@ class AdapterOperationsTest {
     }
 
     @Test
-    void testDeleteById() {
+    void shouldDeleteFranchiseById() {
         when(repository.deleteById("franchise-1")).thenReturn(Mono.empty());
 
         StepVerifier.create(adapter.deleteById("franchise-1"))

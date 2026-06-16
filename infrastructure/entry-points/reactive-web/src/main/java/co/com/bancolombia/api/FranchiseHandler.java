@@ -1,6 +1,10 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.model.franchise.Franchise;
+import co.com.bancolombia.api.dto.resquest.*;
+import co.com.bancolombia.api.dto.response.FranchiseResponse;
+import co.com.bancolombia.api.dto.response.BranchResponse;
+import co.com.bancolombia.api.dto.response.ProductResponse;
+import co.com.bancolombia.api.utils.Constans;
 import co.com.bancolombia.usecase.franchise.CreateFranchiseUseCase;
 import co.com.bancolombia.usecase.franchise.UpdateFranchiseNameUseCase;
 import co.com.bancolombia.usecase.branch.AddBranchUseCase;
@@ -11,23 +15,18 @@ import co.com.bancolombia.usecase.product.UpdateProductStockUseCase;
 import co.com.bancolombia.usecase.product.UpdateProductNameUseCase;
 import co.com.bancolombia.usecase.product.GetMaxStockProductUseCase;
 import co.com.bancolombia.api.validator.RequestValidator;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import static co.com.bancolombia.api.utils.Constans.*;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Tag(name = "Franchise Management", description = "APIs for managing franchises, branches and products")
 public class FranchiseHandler {
 
     private final CreateFranchiseUseCase createFranchiseUseCase;
@@ -39,199 +38,139 @@ public class FranchiseHandler {
     private final UpdateProductStockUseCase updateProductStockUseCase;
     private final UpdateProductNameUseCase updateProductNameUseCase;
     private final GetMaxStockProductUseCase getMaxStockProductUseCase;
+
     private final RequestValidator requestValidator;
     private final ExceptionHandler exceptionHandler;
 
-    @Operation(
-            operationId = "createFranchise",
-            summary = "Create a new franchise",
-            description = "Creates a new franchise with the provided name and optional branches with products"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Franchise created successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Franchise.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Invalid request - validation failed")
-    })
+    // Constantes de parámetros
+    private static final String PARAM_FRANCHISE_ID = Constans.PARAM_FRANCHISE_ID;
+    private static final String PARAM_BRANCH_ID = Constans.PARAM_BRANCH_ID;
+    private static final String PARAM_PRODUCT_ID = Constans.PARAM_PRODUCT_ID;
+
     public Mono<ServerResponse> createFranchise(ServerRequest request) {
+        log.info("Received request to create franchise");
         return request.bodyToMono(CreateFranchiseRequest.class)
                 .flatMap(requestValidator::validate)
                 .flatMap(dto -> createFranchiseUseCase.execute(dto.toFranchise()))
+                .doOnNext(model -> log.info("Franchise created successfully with ID: {}", model.getId()))
+                .map(FranchiseResponse::fromDomain)
                 .flatMap(franchise -> ServerResponse.ok().bodyValue(franchise))
                 .onErrorResume(exceptionHandler::handleException);
     }
 
-    @Operation(
-            operationId = "updateFranchiseName",
-            summary = "Update franchise name",
-            description = "Updates the name of an existing franchise"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Name updated successfully",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(responseCode = "404", description = "Franchise not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
-    })
-    public Mono<ServerResponse> updateFranchiseName(
-            @Parameter(
-                    name = "franchiseId",
-                    description = "The ID of the franchise to update",
-                    in = ParameterIn.PATH,
-                    required = true,
-                    example = "550e8400-e29b-41d4-a716-446655440000"
-            ) ServerRequest request) {
-        String franchiseId = request.pathVariable("franchiseId");
+    public Mono<ServerResponse> updateFranchiseName(ServerRequest request) {
+        String franchiseId = request.pathVariable(PARAM_FRANCHISE_ID);
+        log.info("Received request to update franchise name for ID: {}", franchiseId);
         return request.bodyToMono(UpdateFranchiseNameRequest.class)
                 .flatMap(requestValidator::validate)
                 .flatMap(dto -> updateFranchiseNameUseCase.execute(franchiseId, dto.newName()))
-                .flatMap(franchise -> ServerResponse.ok().bodyValue(franchise))
+                .doOnNext(franchise -> log.info("Franchise name updated successfully"))
+                .map(FranchiseResponse::fromDomain)
+                .flatMap(franchiseResponse ->
+                        ServerResponse.ok().bodyValue(franchiseResponse)
+                )
                 .onErrorResume(exceptionHandler::handleException);
     }
 
-    @Operation(
-            operationId = "addBranch",
-            summary = "Add branch to franchise",
-            description = "Adds a new branch to an existing franchise"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Branch added successfully",
-                    content = @Content(mediaType = "application/json")
-            ),
-            @ApiResponse(responseCode = "404", description = "Franchise not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
-    })
-    public Mono<ServerResponse> addBranch(
-            @Parameter(name = "franchiseId", description = "Franchise ID", in = ParameterIn.PATH, required = true) ServerRequest request) {
-        String franchiseId = request.pathVariable("franchiseId");
+    public Mono<ServerResponse> addBranch(ServerRequest request) {
+        String franchiseId = request.pathVariable(PARAM_FRANCHISE_ID);
+        log.info("Received request to add branch to franchise ID: {}", franchiseId);
         return request.bodyToMono(AddBranchRequest.class)
                 .flatMap(requestValidator::validate)
                 .flatMap(dto -> addBranchUseCase.execute(franchiseId, dto.toBranch()))
-                .flatMap(branch -> ServerResponse.ok().bodyValue(branch))
+                .doOnNext(branch -> log.info("Branch added successfully"))
+                .map(BranchResponse::fromDomain)
+                .flatMap(branch ->
+                        ServerResponse.ok().bodyValue(branch)
+                )
                 .onErrorResume(exceptionHandler::handleException);
     }
 
-    @Operation(
-            operationId = "updateBranchName",
-            summary = "Update branch name",
-            description = "Updates the name of an existing branch"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Name updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Franchise or branch not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
-    })
     public Mono<ServerResponse> updateBranchName(ServerRequest request) {
-        String franchiseId = request.pathVariable("franchiseId");
-        String branchId = request.pathVariable("branchId");
+        String franchiseId = request.pathVariable(PARAM_FRANCHISE_ID);
+        String branchId = request.pathVariable(PARAM_BRANCH_ID);
+        log.info("Received request to update branch name - FranchiseID: {}, BranchID: {}", franchiseId, branchId);
         return request.bodyToMono(UpdateBranchNameRequest.class)
                 .flatMap(requestValidator::validate)
-                .flatMap(dto -> updateBranchNameUseCase.execute(franchiseId, branchId, dto.newName()))
-                .flatMap(branch -> ServerResponse.ok().bodyValue(branch))
+                .flatMap(dto ->
+                        updateBranchNameUseCase.execute(franchiseId, branchId, dto.newName())
+                )
+                .doOnNext(branch -> log.info("Branch name updated successfully"))
+                .map(BranchResponse::fromDomain)
+                .flatMap(branch ->
+                        ServerResponse.ok().bodyValue(branch)
+                )
                 .onErrorResume(exceptionHandler::handleException);
     }
 
-    @Operation(
-            operationId = "addProduct",
-            summary = "Add product to branch",
-            description = "Adds a new product to an existing branch"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Product added successfully"),
-            @ApiResponse(responseCode = "404", description = "Franchise or branch not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
-    })
     public Mono<ServerResponse> addProduct(ServerRequest request) {
-        String franchiseId = request.pathVariable("franchiseId");
-        String branchId = request.pathVariable("branchId");
+        String franchiseId = request.pathVariable(PARAM_FRANCHISE_ID);
+        String branchId = request.pathVariable(PARAM_BRANCH_ID);
+        log.info("Received request to add product - FranchiseID: {}, BranchID: {}", franchiseId, branchId);
         return request.bodyToMono(AddProductRequest.class)
                 .flatMap(requestValidator::validate)
                 .flatMap(dto -> addProductUseCase.execute(franchiseId, branchId, dto.toProduct()))
-                .flatMap(product -> ServerResponse.ok().bodyValue(product))
+                .doOnNext(product -> log.info("Product added successfully"))
+                .map(ProductResponse::fromDomain)
+                .flatMap(product ->
+                        ServerResponse.ok().bodyValue(product)
+                )
                 .onErrorResume(exceptionHandler::handleException);
     }
 
-    @Operation(
-            operationId = "deleteProduct",
-            summary = "Delete product",
-            description = "Deletes a product from a branch"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Resource not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
-    })
     public Mono<ServerResponse> deleteProduct(ServerRequest request) {
-        String franchiseId = request.pathVariable("franchiseId");
-        String branchId = request.pathVariable("branchId");
-        String productId = request.pathVariable("productId");
+        String franchiseId = request.pathVariable(PARAM_FRANCHISE_ID);
+        String branchId = request.pathVariable(PARAM_BRANCH_ID);
+        String productId = request.pathVariable(PARAM_PRODUCT_ID);
+        log.info("Received request to delete product");
         return deleteProductUseCase.execute(franchiseId, branchId, productId)
+                .doOnSuccess(v -> log.info("Product deleted successfully"))
                 .then(ServerResponse.noContent().build())
                 .onErrorResume(exceptionHandler::handleException);
     }
 
-    @Operation(
-            operationId = "updateProductStock",
-            summary = "Update product stock",
-            description = "Updates the stock quantity of a product"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Stock updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Resource not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid stock value or invalid request")
-    })
     public Mono<ServerResponse> updateProductStock(ServerRequest request) {
-        String franchiseId = request.pathVariable("franchiseId");
-        String branchId = request.pathVariable("branchId");
-        String productId = request.pathVariable("productId");
+        String franchiseId = request.pathVariable(PARAM_FRANCHISE_ID);
+        String branchId = request.pathVariable(PARAM_BRANCH_ID);
+        String productId = request.pathVariable(PARAM_PRODUCT_ID);
+        log.info("Received request to update product stock ");
         return request.bodyToMono(UpdateProductStockRequest.class)
                 .flatMap(requestValidator::validate)
-                .flatMap(dto -> updateProductStockUseCase.execute(franchiseId, branchId, productId, dto.newStock()))
-                .flatMap(product -> ServerResponse.ok().bodyValue(product))
+                .flatMap(dto ->
+                        updateProductStockUseCase.execute(franchiseId, branchId, productId, dto.newStock())
+                )
+                .doOnNext(product -> log.info("Product stock updated successfully"))
+                .map(ProductResponse::fromDomain)
+                .flatMap(product ->
+                        ServerResponse.ok().bodyValue(product)
+                )
                 .onErrorResume(exceptionHandler::handleException);
     }
 
-    @Operation(
-            operationId = "updateProductName",
-            summary = "Update product name",
-            description = "Updates the name of a product"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Name updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Resource not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
-    })
     public Mono<ServerResponse> updateProductName(ServerRequest request) {
-        String franchiseId = request.pathVariable("franchiseId");
-        String branchId = request.pathVariable("branchId");
-        String productId = request.pathVariable("productId");
+        String franchiseId = request.pathVariable(PARAM_FRANCHISE_ID);
+        String branchId = request.pathVariable(PARAM_BRANCH_ID);
+        String productId = request.pathVariable(PARAM_PRODUCT_ID);
+        log.info("Received request to update product name ");
         return request.bodyToMono(UpdateProductNameRequest.class)
                 .flatMap(requestValidator::validate)
-                .flatMap(dto -> updateProductNameUseCase.execute(franchiseId, branchId, productId, dto.newName()))
-                .flatMap(product -> ServerResponse.ok().bodyValue(product))
+                .flatMap(dto ->
+                        updateProductNameUseCase.execute(franchiseId, branchId, productId, dto.newName())
+                )
+                .doOnNext(product -> log.info("Product name updated successfully"))
+                .map(ProductResponse::fromDomain)
+                .flatMap(product ->
+                        ServerResponse.ok().bodyValue(product)
+                )
                 .onErrorResume(exceptionHandler::handleException);
     }
 
-    @Operation(
-            operationId = "getMaxStockProduct",
-            summary = "Get product with maximum stock",
-            description = "Gets the product with the highest stock quantity in a franchise"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Product obtained successfully"),
-            @ApiResponse(responseCode = "404", description = "Franchise not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid request")
-    })
     public Mono<ServerResponse> getMaxStockProduct(ServerRequest request) {
-        String franchiseId = request.pathVariable("franchiseId");
+        String franchiseId = request.pathVariable(PARAM_FRANCHISE_ID);
+        log.info("Received request to get max stock product - FranchiseID: {}", franchiseId);
         return getMaxStockProductUseCase.execute(franchiseId)
-                .flatMap(product -> ServerResponse.ok().bodyValue(product))
+                .map(FranchiseResponse::fromDomain)
+                .flatMap(resp -> ServerResponse.ok().bodyValue(resp))
                 .onErrorResume(exceptionHandler::handleException);
     }
 }
