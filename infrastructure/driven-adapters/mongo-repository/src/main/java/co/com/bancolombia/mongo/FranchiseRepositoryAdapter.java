@@ -9,6 +9,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivecommons.utils.ObjectMapper;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
@@ -42,6 +43,14 @@ public class FranchiseRepositoryAdapter
         return super.findById(id)
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .onErrorMap(this::isInfrastructureError,ex -> handleError(ex, "find franchise by id: " + id));
+    }
+
+    public Mono<Franchise> findByName(String name) {
+        FranchiseData example = new FranchiseData();
+        example.setName(name);
+
+        return repository.findOne(Example.of(example))
+                .map(this::toEntity);
     }
 
     @Override
