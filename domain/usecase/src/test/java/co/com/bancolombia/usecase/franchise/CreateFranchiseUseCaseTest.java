@@ -18,6 +18,7 @@ import reactor.test.StepVerifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +46,7 @@ public class CreateFranchiseUseCaseTest {
         branch.setProducts(new ArrayList<>(List.of(productOld)));
         franchise.setBranches(new ArrayList<>(List.of(branch)));
 
+        when(franchiseRepository.findByName(anyString())).thenReturn(Mono.empty());
         when(franchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
         when(franchiseRepository.save(franchise)).thenReturn(reactor.core.publisher.Mono.just(franchise));
 
