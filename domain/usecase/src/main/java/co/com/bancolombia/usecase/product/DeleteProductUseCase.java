@@ -19,7 +19,7 @@ public class DeleteProductUseCase {
                     boolean branchFound = franchise.getBranches()
                             .stream()
                             .filter(b -> b.getId().equals(branchId))
-                            .peek(branch -> branch.getProducts()
+                            .map(branch -> branch.getProducts()
                                     .removeIf(p -> p.getId().equals(productId)))
                             .findFirst()
                             .isPresent();

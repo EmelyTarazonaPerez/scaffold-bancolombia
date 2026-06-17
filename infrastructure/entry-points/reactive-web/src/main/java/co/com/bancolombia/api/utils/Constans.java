@@ -1,8 +1,5 @@
 package co.com.bancolombia.api.utils;
 
-/**
- * Clase que centraliza todas las constantes y strings hardcoded de la capa entry-points
- */
 public class Constans {
 
     // =============== TAGS Y ANOTACIONES ===============
