@@ -4,7 +4,6 @@ import co.com.bancolombia.api.dto.resquest.*;
 import co.com.bancolombia.api.dto.response.FranchiseResponse;
 import co.com.bancolombia.api.dto.response.BranchResponse;
 import co.com.bancolombia.api.dto.response.ProductResponse;
-import co.com.bancolombia.api.utils.Constans;
 import co.com.bancolombia.usecase.franchise.CreateFranchiseUseCase;
 import co.com.bancolombia.usecase.franchise.UpdateFranchiseNameUseCase;
 import co.com.bancolombia.usecase.branch.AddBranchUseCase;
@@ -42,10 +41,6 @@ public class FranchiseHandler {
     private final RequestValidator requestValidator;
     private final ExceptionHandler exceptionHandler;
 
-    // Constantes de parámetros
-    private static final String PARAM_FRANCHISE_ID = Constans.PARAM_FRANCHISE_ID;
-    private static final String PARAM_BRANCH_ID = Constans.PARAM_BRANCH_ID;
-    private static final String PARAM_PRODUCT_ID = Constans.PARAM_PRODUCT_ID;
 
     public Mono<ServerResponse> createFranchise(ServerRequest request) {
         log.info("Received request to create franchise");

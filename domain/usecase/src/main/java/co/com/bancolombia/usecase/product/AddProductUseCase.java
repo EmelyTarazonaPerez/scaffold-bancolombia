@@ -15,7 +15,6 @@ public class AddProductUseCase {
     }
 
     public Mono<Product> execute(String franchiseId, String branchId, Product product) {
-        System.out.println("Executing AddProductUseCase with franchiseId: " + franchiseId + ", branchId: " + branchId + ", product: " + product);
         return franchiseRepository.findById(franchiseId)
                 .switchIfEmpty(Mono.error( Exceptions.franchiseNotFound()))
                 .flatMap(franchise -> {
@@ -26,7 +25,6 @@ public class AddProductUseCase {
                             .orElseThrow(Exceptions::branchNotFound);
 
                     branch.getProducts().add(product);
-                    System.out.println("Added product to branch. Branch now has products: " + branch.getProducts());
                     return franchiseRepository.save(franchise)
                             .thenReturn(product);
                 });

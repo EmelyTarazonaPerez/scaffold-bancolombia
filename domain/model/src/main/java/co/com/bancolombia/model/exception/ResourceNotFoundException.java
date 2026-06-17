@@ -1,8 +1,5 @@
 package co.com.bancolombia.model.exception;
 
-/**
- * Exception thrown when a resource is not found
- */
 public class ResourceNotFoundException extends DomainException {
     private final String resourceId;
 
