@@ -1,18 +1,12 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.dto.resquest.*;
-import co.com.bancolombia.api.dto.response.FranchiseResponse;
-import co.com.bancolombia.api.dto.response.BranchResponse;
-import co.com.bancolombia.api.dto.response.ProductResponse;
+import co.com.bancolombia.api.dto.request.*;
+import co.com.bancolombia.api.dto.response.*;
 import co.com.bancolombia.usecase.franchise.CreateFranchiseUseCase;
 import co.com.bancolombia.usecase.franchise.UpdateFranchiseNameUseCase;
 import co.com.bancolombia.usecase.branch.AddBranchUseCase;
 import co.com.bancolombia.usecase.branch.UpdateBranchNameUseCase;
-import co.com.bancolombia.usecase.product.AddProductUseCase;
-import co.com.bancolombia.usecase.product.DeleteProductUseCase;
-import co.com.bancolombia.usecase.product.UpdateProductStockUseCase;
-import co.com.bancolombia.usecase.product.UpdateProductNameUseCase;
-import co.com.bancolombia.usecase.product.GetMaxStockProductUseCase;
+import co.com.bancolombia.usecase.product.*;
 import co.com.bancolombia.api.validator.RequestValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +15,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static co.com.bancolombia.api.utils.Constans.*;
+import static co.com.bancolombia.api.utils.Constants.*;
 
 @Slf4j
 @Component
@@ -44,7 +38,7 @@ public class FranchiseHandler {
 
     public Mono<ServerResponse> createFranchise(ServerRequest request) {
         log.info("Received request to create franchise");
-        return request.bodyToMono(CreateFranchiseRequest.class)
+        return request.bodyToMono( CreateFranchiseRequest.class)
                 .flatMap(requestValidator::validate)
                 .flatMap(dto -> createFranchiseUseCase.execute(dto.toFranchise()))
                 .doOnNext(model -> log.info("Franchise created successfully with ID: {}", model.getId()))
@@ -59,7 +53,7 @@ public class FranchiseHandler {
         return request.bodyToMono(UpdateFranchiseNameRequest.class)
                 .flatMap(requestValidator::validate)
                 .flatMap(dto -> updateFranchiseNameUseCase.execute(franchiseId, dto.newName()))
-                .doOnNext(franchise -> log.info("Franchise name updated successfully"))
+                .doOnNext(franchise -> log.info("Franchise name updated successfully {}: ", franchise.getName() ))
                 .map(FranchiseResponse::fromDomain)
                 .flatMap(franchiseResponse ->
                         ServerResponse.ok().bodyValue(franchiseResponse)
@@ -73,7 +67,7 @@ public class FranchiseHandler {
         return request.bodyToMono(AddBranchRequest.class)
                 .flatMap(requestValidator::validate)
                 .flatMap(dto -> addBranchUseCase.execute(franchiseId, dto.toBranch()))
-                .doOnNext(branch -> log.info("Branch added successfully"))
+                .doOnNext(branch -> log.info("Branch added successfully {}: ", branch.getName() ))
                 .map(BranchResponse::fromDomain)
                 .flatMap(branch ->
                         ServerResponse.ok().bodyValue(branch)
@@ -90,7 +84,7 @@ public class FranchiseHandler {
                 .flatMap(dto ->
                         updateBranchNameUseCase.execute(franchiseId, branchId, dto.newName())
                 )
-                .doOnNext(branch -> log.info("Branch name updated successfully"))
+                .doOnNext(branch -> log.info("Branch name updated successfully {}: ", branch.getName() ))
                 .map(BranchResponse::fromDomain)
                 .flatMap(branch ->
                         ServerResponse.ok().bodyValue(branch)
@@ -105,7 +99,7 @@ public class FranchiseHandler {
         return request.bodyToMono(AddProductRequest.class)
                 .flatMap(requestValidator::validate)
                 .flatMap(dto -> addProductUseCase.execute(franchiseId, branchId, dto.toProduct()))
-                .doOnNext(product -> log.info("Product added successfully"))
+                .doOnNext(product -> log.info("Product added successfully {}: ", product.getName() ))
                 .map(ProductResponse::fromDomain)
                 .flatMap(product ->
                         ServerResponse.ok().bodyValue(product)
@@ -119,7 +113,7 @@ public class FranchiseHandler {
         String productId = request.pathVariable(PARAM_PRODUCT_ID);
         log.info("Received request to delete product");
         return deleteProductUseCase.execute(franchiseId, branchId, productId)
-                .doOnSuccess(v -> log.info("Product deleted successfully"))
+                .doOnSuccess(ignore -> log.info("Product deleted successfully"))
                 .then(ServerResponse.noContent().build())
                 .onErrorResume(exceptionHandler::handleException);
     }
@@ -134,7 +128,7 @@ public class FranchiseHandler {
                 .flatMap(dto ->
                         updateProductStockUseCase.execute(franchiseId, branchId, productId, dto.newStock())
                 )
-                .doOnNext(product -> log.info("Product stock updated successfully"))
+                .doOnNext(product -> log.info("Product stock updated successfully {}: ", product.getStock() ))
                 .map(ProductResponse::fromDomain)
                 .flatMap(product ->
                         ServerResponse.ok().bodyValue(product)
@@ -152,7 +146,7 @@ public class FranchiseHandler {
                 .flatMap(dto ->
                         updateProductNameUseCase.execute(franchiseId, branchId, productId, dto.newName())
                 )
-                .doOnNext(product -> log.info("Product name updated successfully"))
+                .doOnNext(product -> log.info("Product name updated successfully {}", product.getId()))
                 .map(ProductResponse::fromDomain)
                 .flatMap(product ->
                         ServerResponse.ok().bodyValue(product)

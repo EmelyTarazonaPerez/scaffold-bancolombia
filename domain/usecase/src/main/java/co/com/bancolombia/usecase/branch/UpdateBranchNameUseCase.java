@@ -2,14 +2,13 @@ package co.com.bancolombia.usecase.branch;
 
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.exception.Exceptions;
-import co.com.bancolombia.model.exception.ResourceNotFoundException;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import reactor.core.publisher.Mono;
 
 public class UpdateBranchNameUseCase {
-    private final FranchiseRepository franchiseRepository;
+    private final IFranchiseRepository franchiseRepository;
 
-    public UpdateBranchNameUseCase(FranchiseRepository franchiseRepository) {
+    public UpdateBranchNameUseCase(IFranchiseRepository franchiseRepository) {
         this.franchiseRepository = franchiseRepository;
     }
 

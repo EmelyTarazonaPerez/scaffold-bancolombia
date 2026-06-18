@@ -1,12 +1,12 @@
 package co.com.bancolombia.api.utils;
 
-public class Constans {
+public class Constants {
 
-    public static final String FRANCHISE_MANAGEMENT_TAG = "Franchise Management";
-    public static final String FRANCHISE_MANAGEMENT_DESCRIPTION = "APIs for managing franchises, branches and products";
+    private Constants() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static final String CREATE_FRANCHISE_SUMMARY = "Create a new franchise";
-    public static final String CREATE_FRANCHISE_DESCRIPTION = "Creates a new franchise with the provided name";
     public static final String CREATE_FRANCHISE_FULL_DESCRIPTION = "Creates a new franchise with the provided name and optional branches with products";
     public static final String UPDATE_FRANCHISE_NAME_SUMMARY = "Update franchise name";
     public static final String UPDATE_FRANCHISE_NAME_DESCRIPTION = "Updates the name of an existing franchise";
@@ -33,10 +33,8 @@ public class Constans {
     public static final String STOCK_UPDATED_SUCCESSFULLY = "Stock updated successfully";
     public static final String PRODUCT_OBTAINED_SUCCESS = "Product obtained successfully";
     public static final String FRANCHISE_NOT_FOUND = "Franchise not found";
-    public static final String RESOURCE_NOT_FOUND = "Resource not found";
     public static final String FRANCHISE_OR_BRANCH_NOT_FOUND = "Franchise or branch not found";
     public static final String INVALID_REQUEST = "Invalid request";
-    public static final String INVALID_STOCK_VALUE = "Invalid stock value or invalid request";
     public static final String INVALID_STOCK_VALUE_ONLY = "Invalid stock value";
     public static final String PRODUCT_NOT_FOUND = "Product not found";
     public static final String SERVICE_UNAVAILABLE = "Service unavailable";
@@ -59,7 +57,6 @@ public class Constans {
     public static final String ERROR_CODE_VALIDATION_ERROR = "VALIDATION_ERROR";
     public static final String ERROR_CODE_NULL_REQUEST = "NULL_REQUEST";
     public static final String ERROR_CODE_INVALID_INPUT = "INVALID_INPUT";
-    public static final String ERROR_CODE_CONSTRAINT_VIOLATION = "CONSTRAINT_VIOLATION";
 
 
     public static final String VALIDATION_ERRORS_MESSAGE = "The request contains validation errors. Please check the violations for details";
@@ -91,30 +88,7 @@ public class Constans {
     public static final String PARAM_DESC_BRANCH_ID = "Branch ID";
     public static final String PARAM_DESC_PRODUCT_ID = "Product ID";
     public static final String PARAM_DESC_FRANCHISE_ID_EXAMPLE = "550e8400-e29b-41d4-a716-446655440000";
-
-
     public static final String MEDIA_TYPE_JSON = "application/json";
-
-
-
-    public static final String HEADER_CONTENT_SECURITY_POLICY = "Content-Security-Policy";
-    public static final String HEADER_CONTENT_SECURITY_POLICY_VALUE = "default-src 'self'; frame-ancestors 'self'; form-action 'self'";
-    public static final String HEADER_STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
-    public static final String HEADER_STRICT_TRANSPORT_SECURITY_VALUE = "max-age=31536000; includeSubDomains; preload";
-    public static final String HEADER_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
-    public static final String HEADER_CONTENT_TYPE_OPTIONS_VALUE = "nosniff";
-    public static final String HEADER_SERVER = "Server";
-    public static final String HEADER_SERVER_VALUE = "";
-    public static final String HEADER_CACHE_CONTROL = "Cache-Control";
-    public static final String HEADER_CACHE_CONTROL_VALUE = "no-store";
-    public static final String HEADER_PRAGMA = "Pragma";
-    public static final String HEADER_PRAGMA_VALUE = "no-cache";
-    public static final String HEADER_REFERRER_POLICY = "Referrer-Policy";
-    public static final String HEADER_REFERRER_POLICY_VALUE = "strict-origin-when-cross-origin";
-
-
-    public static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
-
 
     public static final String RESPONSE_OK = "OK";
 }

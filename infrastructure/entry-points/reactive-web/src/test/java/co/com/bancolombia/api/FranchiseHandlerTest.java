@@ -1,6 +1,6 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.dto.resquest.CreateFranchiseRequest;
+import co.com.bancolombia.api.dto.request.CreateFranchiseRequest;
 import co.com.bancolombia.api.validator.RequestValidator;
 import co.com.bancolombia.model.franchise.Franchise;
 import co.com.bancolombia.usecase.franchise.CreateFranchiseUseCase;

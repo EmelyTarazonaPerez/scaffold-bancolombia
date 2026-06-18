@@ -2,7 +2,7 @@ package co.com.bancolombia.usecase.franchise;
 
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.model.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 public class UpdateFranchiseNameUseCaseTest {
 
     @Mock
-    FranchiseRepository franchiseRepository;
+    IFranchiseRepository IFranchiseRepository;
     @InjectMocks
     UpdateFranchiseNameUseCase updateFranchiseNameUseCase;
 
@@ -29,7 +29,7 @@ public class UpdateFranchiseNameUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        updateFranchiseNameUseCase = new UpdateFranchiseNameUseCase(franchiseRepository);
+        updateFranchiseNameUseCase = new UpdateFranchiseNameUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -42,8 +42,8 @@ public class UpdateFranchiseNameUseCaseTest {
         branch.setProducts(new ArrayList<>(List.of(productOld)));
         franchise.setBranches(new ArrayList<>(List.of(branch)));
 
-        when(franchiseRepository.findById(franchiseId)).thenReturn(reactor.core.publisher.Mono.just(franchise));
-        when(franchiseRepository.save(franchise)).thenReturn(reactor.core.publisher.Mono.just(franchise));
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(reactor.core.publisher.Mono.just(franchise));
+        when(IFranchiseRepository.save(franchise)).thenReturn(reactor.core.publisher.Mono.just(franchise));
 
         StepVerifier.create(updateFranchiseNameUseCase.execute(franchiseId, "New Name"))
                 .assertNext(franchise1 -> {

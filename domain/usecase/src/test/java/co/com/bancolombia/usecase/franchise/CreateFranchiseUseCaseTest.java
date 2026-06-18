@@ -1,9 +1,8 @@
 package co.com.bancolombia.usecase.franchise;
 
 import co.com.bancolombia.model.branch.Branch;
-import co.com.bancolombia.model.exception.Exceptions;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.model.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.when;
 public class CreateFranchiseUseCaseTest {
 
     @Mock
-    FranchiseRepository franchiseRepository;
+    IFranchiseRepository IFranchiseRepository;
     @InjectMocks
     CreateFranchiseUseCase CreateFranchiseUseCase;
 
@@ -33,7 +32,7 @@ public class CreateFranchiseUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        CreateFranchiseUseCase = new CreateFranchiseUseCase(franchiseRepository);
+        CreateFranchiseUseCase = new CreateFranchiseUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -46,9 +45,9 @@ public class CreateFranchiseUseCaseTest {
         branch.setProducts(new ArrayList<>(List.of(productOld)));
         franchise.setBranches(new ArrayList<>(List.of(branch)));
 
-        when(franchiseRepository.findByName(anyString())).thenReturn(Mono.empty());
-        when(franchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(franchise)).thenReturn(reactor.core.publisher.Mono.just(franchise));
+        when(IFranchiseRepository.findByName(anyString())).thenReturn(Mono.empty());
+        when(IFranchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.save(franchise)).thenReturn(reactor.core.publisher.Mono.just(franchise));
 
         StepVerifier.create(CreateFranchiseUseCase.execute(franchise))
                 .assertNext(franchise1 -> {

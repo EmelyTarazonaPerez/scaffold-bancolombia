@@ -32,7 +32,7 @@ public class RequestValidator {
 
             return Mono.error(new ConstraintViolationException(violationMessages));
         }
-        log.info("Request is valid: " + request);
+        log.info("Request is valid: {}", request);
         return Mono.just(request);
     }
 

@@ -86,7 +86,7 @@ variable "mongodb_uri" {
   description = "MongoDB connection URI (with credentials)"
   type        = string
   sensitive   = true
-  default     = "mongodb+srv://emelydayannatp_db_user:3hqdbOaqN5aX8wIR@franchise.ffdctcj.mongodb.net/franchise?retryWrites=true&w=majority"
+  default     = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 }
 
 variable "github_repository" {
