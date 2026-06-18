@@ -1,12 +1,10 @@
 package co.com.bancolombia.usecase.product;
 
 import co.com.bancolombia.model.branch.Branch;
-import co.com.bancolombia.model.exception.Exceptions;
 import co.com.bancolombia.model.exception.ResourceNotFoundException;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.model.product.Product;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,13 +26,13 @@ class UpdateProductNameUseCaseTest {
     UpdateProductNameUseCase updateProductNameUseCase;
 
     @Mock
-    FranchiseRepository franchiseRepository;
+    IFranchiseRepository IFranchiseRepository;
 
     String franchiseId = "franchise1";
 
     @BeforeEach
     void setUp() {
-        updateProductNameUseCase = new UpdateProductNameUseCase(franchiseRepository);
+        updateProductNameUseCase = new UpdateProductNameUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -46,8 +44,8 @@ class UpdateProductNameUseCaseTest {
         branch.setProducts(java.util.List.of(product));
         franchise.setBranches(java.util.List.of(branch));
 
-        when(franchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
 
         StepVerifier.create(updateProductNameUseCase
                         .execute(franchiseId, "1", "2", "New Name"))
@@ -58,7 +56,7 @@ class UpdateProductNameUseCaseTest {
     @Test
     @DisplayName("Test change product name - Franchise not found")
     public void testChangeNameProductFranchiseNotFound() {
-        when(franchiseRepository.findById(franchiseId)).thenReturn(Mono.empty());
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(Mono.empty());
 
         StepVerifier.create(updateProductNameUseCase
                         .execute(franchiseId, "1", "2", "New Name"))

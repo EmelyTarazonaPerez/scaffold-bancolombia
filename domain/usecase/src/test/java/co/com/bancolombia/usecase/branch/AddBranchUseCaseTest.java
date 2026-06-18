@@ -2,7 +2,7 @@ package co.com.bancolombia.usecase.branch;
 
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.model.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class AddBranchUseCaseTest {
 
     @Mock
-    FranchiseRepository franchiseRepository;
+    IFranchiseRepository IFranchiseRepository;
 
     @InjectMocks
     AddBranchUseCase addBranchUseCase;
@@ -31,7 +31,7 @@ public class AddBranchUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        addBranchUseCase = new AddBranchUseCase(franchiseRepository);
+        addBranchUseCase = new AddBranchUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -44,8 +44,8 @@ public class AddBranchUseCaseTest {
         branch.setProducts(new ArrayList<>(List.of(product)));
         franchise.setBranches(new ArrayList<>(List.of(branch)));
 
-        when(franchiseRepository.findById(franchiseId)).thenReturn(reactor.core.publisher.Mono.just(franchise));
-        when(franchiseRepository.save(franchise)).thenReturn(reactor.core.publisher.Mono.just(franchise));
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(reactor.core.publisher.Mono.just(franchise));
+        when(IFranchiseRepository.save(franchise)).thenReturn(reactor.core.publisher.Mono.just(franchise));
 
         StepVerifier.create(addBranchUseCase.execute(franchiseId, branch))
                 .assertNext(addedBranch  -> {

@@ -3,7 +3,7 @@ package co.com.bancolombia.usecase.branch;
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.exception.ResourceNotFoundException;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,11 +27,11 @@ class UpdateBranchNameUseCaseTest {
     private UpdateBranchNameUseCase updateBranchNameUseCase;
 
     @Mock
-    private FranchiseRepository franchiseRepository;
+    private IFranchiseRepository IFranchiseRepository;
 
     @BeforeEach
     void setUp() {
-        updateBranchNameUseCase = new UpdateBranchNameUseCase(franchiseRepository);
+        updateBranchNameUseCase = new UpdateBranchNameUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -53,9 +53,9 @@ class UpdateBranchNameUseCaseTest {
                 .branches(new ArrayList<>(List.of(branch)))
                 .build();
 
-        when(franchiseRepository.findById(franchiseId))
+        when(IFranchiseRepository.findById(franchiseId))
                 .thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(any(Franchise.class)))
+        when(IFranchiseRepository.save(any(Franchise.class)))
                 .thenReturn(Mono.just(franchise));
 
         StepVerifier.create(updateBranchNameUseCase.execute(franchiseId, branchId, newBranchName))
@@ -74,7 +74,7 @@ class UpdateBranchNameUseCaseTest {
         String branchId = "branch-1";
         String newBranchName = "Downtown Updated";
 
-        when(franchiseRepository.findById(franchiseId))
+        when(IFranchiseRepository.findById(franchiseId))
                 .thenReturn(Mono.empty());
 
         StepVerifier.create(updateBranchNameUseCase.execute(franchiseId, branchId, newBranchName))
@@ -101,7 +101,7 @@ class UpdateBranchNameUseCaseTest {
                 .branches(new ArrayList<>(List.of(existingBranch)))
                 .build();
 
-        when(franchiseRepository.findById(franchiseId))
+        when(IFranchiseRepository.findById(franchiseId))
                 .thenReturn(Mono.just(franchise));
 
         StepVerifier.create(updateBranchNameUseCase.execute(franchiseId, branchId, newBranchName))
@@ -134,9 +134,9 @@ class UpdateBranchNameUseCaseTest {
                 .branches(new ArrayList<>(List.of(branch1, branch2)))
                 .build();
 
-        when(franchiseRepository.findById(franchiseId))
+        when(IFranchiseRepository.findById(franchiseId))
                 .thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(any(Franchise.class)))
+        when(IFranchiseRepository.save(any(Franchise.class)))
                 .thenReturn(Mono.just(franchise));
 
         StepVerifier.create(updateBranchNameUseCase.execute(franchiseId, branchId, newBranchName))
@@ -173,9 +173,9 @@ class UpdateBranchNameUseCaseTest {
                 .branches(new ArrayList<>(List.of(branch1, branch2)))
                 .build();
 
-        when(franchiseRepository.findById(franchiseId))
+        when(IFranchiseRepository.findById(franchiseId))
                 .thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(any(Franchise.class)))
+        when(IFranchiseRepository.save(any(Franchise.class)))
                 .thenReturn(Mono.just(franchise));
 
         StepVerifier.create(updateBranchNameUseCase.execute(franchiseId, branchId, newBranchName))
@@ -206,9 +206,9 @@ class UpdateBranchNameUseCaseTest {
                 .branches(new ArrayList<>(List.of(branch)))
                 .build();
 
-        when(franchiseRepository.findById(franchiseId))
+        when(IFranchiseRepository.findById(franchiseId))
                 .thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(any(Franchise.class)))
+        when(IFranchiseRepository.save(any(Franchise.class)))
                 .thenReturn(Mono.just(franchise));
 
         StepVerifier.create(updateBranchNameUseCase.execute(franchiseId, branchId, newBranchName))

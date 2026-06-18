@@ -1,19 +1,14 @@
 package co.com.bancolombia.usecase.product;
 
-import co.com.bancolombia.model.branch.Branch;
-import co.com.bancolombia.model.branch.gateways.BranchRepository;
 import co.com.bancolombia.model.exception.Exceptions;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.product.Product;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
-import reactor.core.publisher.Flux;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import reactor.core.publisher.Mono;
 
-import java.util.Comparator;
-
 public class GetMaxStockProductUseCase {
-    private final FranchiseRepository franchiseRepository;
-    public GetMaxStockProductUseCase(FranchiseRepository franchiseRepository) {
+
+    private final IFranchiseRepository franchiseRepository;
+    public GetMaxStockProductUseCase(IFranchiseRepository franchiseRepository) {
         this.franchiseRepository = franchiseRepository;
     }
 

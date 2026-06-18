@@ -6,7 +6,6 @@ import lombok.Builder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Builder
 @Schema(description = "Branch response DTO")
@@ -22,7 +21,7 @@ public record BranchResponse(
         List<ProductResponse> products = branch.getProducts() != null && !branch.getProducts().isEmpty()
                 ? branch.getProducts().stream()
                 .map(ProductResponse::fromDomain)
-                .collect(Collectors.toList())
+                .toList()
                 : new ArrayList<>();
 
         return BranchResponse.builder()

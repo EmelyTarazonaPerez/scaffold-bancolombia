@@ -12,7 +12,15 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class Franchise {
     private String id;
+    private Long version;
     private String name;
     @Builder.Default
     private List<Branch> branches = new ArrayList<>();
+
+    public Franchise(String id, String name, List<Branch> branches) {
+        this.id = id;
+        this.name = name;
+        this.branches = branches;
+    }
+
 }

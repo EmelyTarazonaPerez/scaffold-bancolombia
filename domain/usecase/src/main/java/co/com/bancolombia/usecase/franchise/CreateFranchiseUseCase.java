@@ -2,17 +2,17 @@ package co.com.bancolombia.usecase.franchise;
 
 import co.com.bancolombia.model.exception.InvalidInputException;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import reactor.core.publisher.Mono;
 
-import static co.com.bancolombia.usecase.utils.Utis.*;
-
+import static co.com.bancolombia.usecase.utils.Utils.*;
 
 
 public class CreateFranchiseUseCase {
-    private final FranchiseRepository franchiseRepository;
 
-    public CreateFranchiseUseCase(FranchiseRepository franchiseRepository) {
+    private final IFranchiseRepository franchiseRepository;
+
+    public CreateFranchiseUseCase(IFranchiseRepository franchiseRepository) {
         this.franchiseRepository = franchiseRepository;
     }
 

@@ -2,7 +2,7 @@ package co.com.bancolombia.mongo;
 
 import co.com.bancolombia.model.exception.ServiceUnavailableException;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.mongo.helper.AdapterOperations;
 import co.com.bancolombia.mongo.utils.Constans;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -15,17 +15,17 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Repository
-public class FranchiseRepositoryAdapter
+public class IFranchiseRepositoryAdapter
         extends AdapterOperations<
         Franchise,
         FranchiseData,
         String,
         FranchiseMongoRepository>
-        implements FranchiseRepository {
+        implements IFranchiseRepository {
 
     private final CircuitBreaker circuitBreaker;
 
-    public FranchiseRepositoryAdapter(
+    public IFranchiseRepositoryAdapter(
             FranchiseMongoRepository repository,
             ObjectMapper mapper,
             CircuitBreaker mongoCB) {

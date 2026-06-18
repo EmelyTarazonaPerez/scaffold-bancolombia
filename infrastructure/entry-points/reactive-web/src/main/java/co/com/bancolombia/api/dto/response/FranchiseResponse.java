@@ -22,7 +22,7 @@ public record FranchiseResponse(
         List<BranchResponse> branches = franchise.getBranches() != null && !franchise.getBranches().isEmpty()
                 ? franchise.getBranches().stream()
                 .map(BranchResponse::fromDomain)
-                .collect(Collectors.toList())
+                .toList()
                 : new ArrayList<>();
 
         return FranchiseResponse.builder()

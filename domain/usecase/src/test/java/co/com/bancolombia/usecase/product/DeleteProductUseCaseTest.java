@@ -2,7 +2,7 @@ package co.com.bancolombia.usecase.product;
 
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.model.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,13 +28,13 @@ public class DeleteProductUseCaseTest {
     private DeleteProductUseCase deleteProductUseCase;
 
     @Mock
-    private FranchiseRepository franchiseRepository;
+    private IFranchiseRepository IFranchiseRepository;
 
     String franchiseId = "1";
 
     @BeforeEach
     void setUp() {
-        deleteProductUseCase = new DeleteProductUseCase(franchiseRepository);
+        deleteProductUseCase = new DeleteProductUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -46,8 +46,8 @@ public class DeleteProductUseCaseTest {
         branch.setProducts(new ArrayList<>(List.of(productOld)));
         franchise.setBranches(new ArrayList<>(List.of(branch)));
 
-        when(franchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(any(Franchise.class))).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.save(any(Franchise.class))).thenReturn(Mono.just(franchise));
 
         StepVerifier.create(deleteProductUseCase.execute(franchiseId, "1", "2"))
                 .verifyComplete();

@@ -6,9 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -20,6 +19,8 @@ import java.util.List;
 public class FranchiseData {
     @Id
     private String id;
+    @Version
+    private Long version;
     private String name;
     private List<BranchData> branches;
 }

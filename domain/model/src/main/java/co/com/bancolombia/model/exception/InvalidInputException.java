@@ -1,8 +1,6 @@
 package co.com.bancolombia.model.exception;
 
-/**
- * Exception thrown when invalid input is provided
- */
+
 public class InvalidInputException extends DomainException {
 
     public InvalidInputException(String fieldName, String reason) {
