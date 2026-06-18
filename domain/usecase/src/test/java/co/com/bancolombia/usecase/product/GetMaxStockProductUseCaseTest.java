@@ -2,7 +2,7 @@ package co.com.bancolombia.usecase.product;
 
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.model.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,12 +23,12 @@ public class GetMaxStockProductUseCaseTest {
     @InjectMocks
     private GetMaxStockProductUseCase getMaxStockProductUseCase;
     @Mock
-    private FranchiseRepository franchiseRepository;
+    private IFranchiseRepository IFranchiseRepository;
     String franchiseId = "1";
 
     @BeforeEach
     void setUp() {
-        getMaxStockProductUseCase = new GetMaxStockProductUseCase(franchiseRepository);
+        getMaxStockProductUseCase = new GetMaxStockProductUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -41,8 +41,8 @@ public class GetMaxStockProductUseCaseTest {
         branch.setProducts(java.util.List.of(product));
         franchise.setBranches(java.util.List.of(branch));
 
-        when(franchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
-        when(franchiseRepository.findMaxStockProductByBranch(franchiseId)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.findMaxStockProductByBranch(franchiseId)).thenReturn(Mono.just(franchise));
 
         StepVerifier.create(getMaxStockProductUseCase.execute(franchiseId))
                 .assertNext(result -> {

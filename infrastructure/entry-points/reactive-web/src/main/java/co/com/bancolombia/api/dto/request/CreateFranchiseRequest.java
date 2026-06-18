@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.dto.resquest;
+package co.com.bancolombia.api.dto.request;
 
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.franchise.Franchise;
@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotEmpty;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Schema(description = "Request to create a new franchise with branches and products")
 public record CreateFranchiseRequest(
@@ -22,11 +20,10 @@ public record CreateFranchiseRequest(
         List<Branch> branchList = branches != null && !branches.isEmpty()
                 ? branches.stream()
                 .map(BranchInFranchiseRequest::toBranch)
-                .collect(Collectors.toList())
+                .toList()
                 : new ArrayList<>();
 
         return Franchise.builder()
-                .id(UUID.randomUUID().toString())
                 .name(name)
                 .branches(branchList)
                 .build();

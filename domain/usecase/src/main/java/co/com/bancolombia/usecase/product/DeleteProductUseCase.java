@@ -1,34 +1,44 @@
 package co.com.bancolombia.usecase.product;
 
 import co.com.bancolombia.model.exception.Exceptions;
-import co.com.bancolombia.model.exception.ResourceNotFoundException;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import reactor.core.publisher.Mono;
 
-public class DeleteProductUseCase {
-    private final FranchiseRepository franchiseRepository;
+import java.util.stream.Collectors;
 
-    public DeleteProductUseCase(FranchiseRepository franchiseRepository) {
-        this.franchiseRepository = franchiseRepository;
+public class DeleteProductUseCase {
+
+    private final IFranchiseRepository IFranchiseRepository;
+
+    public DeleteProductUseCase(IFranchiseRepository IFranchiseRepository) {
+        this.IFranchiseRepository = IFranchiseRepository;
     }
 
     public Mono<Void> execute(String franchiseId, String branchId, String productId) {
-        return franchiseRepository.findById(franchiseId)
+        return IFranchiseRepository.findById(franchiseId)
                 .switchIfEmpty(Mono.error(Exceptions.franchiseNotFound()))
                 .flatMap(franchise -> {
-                    boolean branchFound = franchise.getBranches()
+                    var branch = franchise.getBranches()
                             .stream()
                             .filter(b -> b.getId().equals(branchId))
-                            .map(branch -> branch.getProducts()
-                                    .removeIf(p -> p.getId().equals(productId)))
                             .findFirst()
-                            .isPresent();
+                            .orElseThrow(Exceptions::branchNotFound);
 
-                    if (!branchFound) {
-                        return Mono.error(Exceptions.branchNotFound());
+                    boolean productExists = branch.getProducts()
+                            .stream()
+                            .anyMatch(p -> p.getId().equals(productId));
+
+                    if (!productExists) {
+                        return Mono.error(Exceptions.productNotFound());
                     }
 
-                    return franchiseRepository.save(franchise).then();
+                    var updatedProducts = branch.getProducts()
+                            .stream()
+                            .filter(p -> !p.getId().equals(productId))
+                            .collect(Collectors.toList());
+
+                    branch.setProducts(updatedProducts);
+                    return IFranchiseRepository.save(franchise).then();
                 });
     }
 }

@@ -4,9 +4,6 @@ import lombok.Getter;
 
 import java.util.Set;
 
-/**
- * Excepción base para errores de validación
- */
 @Getter
 public class ValidationException extends RuntimeException {
     private final Set<String> violations;

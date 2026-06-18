@@ -3,7 +3,7 @@ package co.com.bancolombia.usecase.product;
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.exception.Exceptions;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.model.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,12 +24,12 @@ public class UpdateProductStockUseCaseTest {
     private UpdateProductStockUseCase updateProductStockUseCase;
 
     @Mock
-    private FranchiseRepository franchiseRepository;
+    private IFranchiseRepository IFranchiseRepository;
     String franchiseId = "1";
 
     @BeforeEach
     void setUp() {
-        updateProductStockUseCase = new UpdateProductStockUseCase(franchiseRepository);
+        updateProductStockUseCase = new UpdateProductStockUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -42,8 +42,8 @@ public class UpdateProductStockUseCaseTest {
         branch.setProducts(java.util.List.of(product));
         franchise.setBranches(java.util.List.of(branch));
 
-        when(franchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
 
         StepVerifier.create(updateProductStockUseCase.execute(franchiseId, "1", "2", 20))
                 .assertNext(updatedProduct -> {
@@ -56,7 +56,7 @@ public class UpdateProductStockUseCaseTest {
     @Test
     @DisplayName("Test UpdateProductStockUseCase with non-existing franchise")
     void testUpdateProductStockUseCaseFranchiseNotFound() {
-        when(franchiseRepository.findById(franchiseId)).thenReturn(Mono.empty());
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(Mono.empty());
         StepVerifier.create(updateProductStockUseCase.execute(franchiseId, "1", "2", 20))
                 .expectError(Exceptions.franchiseNotFound().getClass())
                 .verify();

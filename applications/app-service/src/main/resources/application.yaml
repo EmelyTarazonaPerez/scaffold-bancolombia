@@ -1,5 +1,6 @@
 server:
   port: 8080
+
 spring:
   application:
     name: "cleanArchitecture"
@@ -12,9 +13,13 @@ spring:
   profiles:
     include: null
   data:
-      mongodb:
-        uri: NONE
+    mongodb:
+      uri: ${MONGODB_URI}
+
 management:
+  health:
+    mongo:
+      enabled: false
   endpoints:
     web:
       exposure:
@@ -23,6 +28,8 @@ management:
     health:
       probes:
         enabled: true
+      show-details: never
+
 springdoc:
   swagger-ui:
     enabled: true
@@ -34,8 +41,10 @@ springdoc:
     enabled: true
     path: /v3/api-docs
   show-actuator: false
+
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+
 resilience4j:
   circuitbreaker:
     configs:
