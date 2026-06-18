@@ -3,7 +3,7 @@ package co.com.bancolombia.mongo.helper;
 import co.com.bancolombia.model.franchise.Franchise;
 import co.com.bancolombia.mongo.FranchiseData;
 import co.com.bancolombia.mongo.FranchiseMongoRepository;
-import co.com.bancolombia.mongo.FranchiseRepositoryAdapter;
+import co.com.bancolombia.mongo.IFranchiseRepositoryAdapter;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class AdapterOperationsTest {
     @Mock
     private CircuitBreaker circuitBreaker;
 
-    private FranchiseRepositoryAdapter adapter;
+    private IFranchiseRepositoryAdapter adapter;
 
     private Franchise franchise;
     private FranchiseData franchiseData;
@@ -56,7 +56,7 @@ class AdapterOperationsTest {
         lenient().when(circuitBreaker.tryAcquirePermission()).thenReturn(true);
         lenient().when(circuitBreaker.getCurrentTimestamp()).thenReturn(System.nanoTime());
 
-        adapter = new FranchiseRepositoryAdapter(repository, objectMapper, circuitBreaker);
+        adapter = new IFranchiseRepositoryAdapter(repository, objectMapper, circuitBreaker);
     }
 
     @Test

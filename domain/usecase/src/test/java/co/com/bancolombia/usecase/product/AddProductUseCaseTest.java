@@ -3,7 +3,7 @@ package co.com.bancolombia.usecase.product;
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.exception.Exceptions;
 import co.com.bancolombia.model.franchise.Franchise;
-import co.com.bancolombia.model.franchise.gateways.FranchiseRepository;
+import co.com.bancolombia.model.franchise.gateways.IFranchiseRepository;
 import co.com.bancolombia.model.product.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,12 +28,12 @@ public class AddProductUseCaseTest {
     private AddProductUseCase addProductUseCase;
 
     @Mock
-    private FranchiseRepository franchiseRepository;
+    private IFranchiseRepository IFranchiseRepository;
     String franchiseId = "1";
 
     @BeforeEach
     void setUp() {
-        addProductUseCase = new AddProductUseCase(franchiseRepository);
+        addProductUseCase = new AddProductUseCase(IFranchiseRepository);
     }
 
     @Test
@@ -46,8 +46,8 @@ public class AddProductUseCaseTest {
         branch.setProducts(new ArrayList<>(List.of(productOld)));
         franchise.setBranches(new ArrayList<>(List.of(branch)));
 
-        when(franchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
-        when(franchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(Mono.just(franchise));
+        when(IFranchiseRepository.save(franchise)).thenReturn(Mono.just(franchise));
 
         StepVerifier.create(addProductUseCase.execute(franchiseId, "1", productNew))
                 .assertNext(addedProduct -> {
@@ -63,7 +63,7 @@ public class AddProductUseCaseTest {
     @DisplayName("Test AddProductUseCase with non-existing franchise")
     void testAddProductUseCaseFranchiseNotFound() {
         Product productNew = new Product("3", "Name", 10);
-        when(franchiseRepository.findById(franchiseId)).thenReturn(Mono.empty());
+        when(IFranchiseRepository.findById(franchiseId)).thenReturn(Mono.empty());
         StepVerifier.create(addProductUseCase.execute(franchiseId, "1", productNew))
                 .expectError(Exceptions.franchiseNotFound().getClass())
                 .verify();

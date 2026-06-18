@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.dto.resquest;
+package co.com.bancolombia.api.dto.request;
 
 import co.com.bancolombia.model.branch.Branch;
 import co.com.bancolombia.model.product.Product;
@@ -7,9 +7,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Schema(description = "Branch in nested request")
 public record BranchInFranchiseRequest(
@@ -24,8 +24,8 @@ public record BranchInFranchiseRequest(
 ) {
     public Branch toBranch() {
         List<Product> products = product != null && !product.isEmpty()
-                ? product.stream().map(ProductInBranchRequest::toProduct).collect(Collectors.toList())
-                : new java.util.ArrayList<>();
+                ? product.stream().map(ProductInBranchRequest::toProduct).toList()
+                : new ArrayList<>();
 
         return Branch.builder()
                 .id(UUID.randomUUID().toString())

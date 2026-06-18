@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.dto.resquest;
+package co.com.bancolombia.api.dto.request;
 
 import co.com.bancolombia.model.product.Product;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,13 +8,13 @@ import jakarta.validation.constraints.Positive;
 
 import java.util.UUID;
 
-@Schema(description = "Product in nested request")
-public record ProductInBranchRequest(
-        @Schema(description = "Product name", example = "agua")
+@Schema(description = "Request to add a new product to a branch")
+public record AddProductRequest(
+        @Schema(description = "Product name", example = "Premium Credit Card")
         @NotNull(message = "Product name cannot be null")
         @NotEmpty(message = "Product name cannot be empty")
         String name,
-        @Schema(description = "Product stock", example = "5")
+        @Schema(description = "Initial product stock", example = "100")
         @NotNull(message = "Stock cannot be null")
         @Positive(message = "Stock must be a positive number")
         Integer stock
@@ -27,5 +27,4 @@ public record ProductInBranchRequest(
                 .build();
     }
 }
-
 
